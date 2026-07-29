@@ -141,4 +141,35 @@ router.put('/booking/:id/status', verifyToken, requireAdmin, async (req, res) =>
   }
 });
 
+// ===== GET daftar booking milik user yang login =====
+router.get('/booking/milik-saya', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await pool.query(
+      `SELECT br.id, DATE_FORMAT(br.tanggal, '%Y-%m-%d') as tanggal, br.jam_mulai, br.jam_selesai, br.keperluan, br.status,
+              r.nama_ruangan
+       FROM booking_ruangan br
+       JOIN ruangan r ON br.ruangan_id = r.id
+       WHERE br.user_id = ?
+       ORDER BY br.tanggal DESC, br.jam_mulai DESC`,
+      [userId]
+    );
+
+    const data = rows.map(r => ({
+      id: r.id,
+      namaRuangan: r.nama_ruangan,
+      tanggal: r.tanggal,
+      jamMulai: r.jam_mulai,
+      jamSelesai: r.jam_selesai,
+      keperluan: r.keperluan,
+      status: r.status
+    }));
+
+    res.json({ success: true, data, message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, data: null, message: 'Server error' });
+  }
+});
+
 module.exports = router;

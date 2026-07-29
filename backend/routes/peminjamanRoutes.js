@@ -4,13 +4,32 @@ const router = express.Router();
 const pool = require('../config/db');
 const { verifyToken, requireAdmin } = require('../middleware/auth');
 
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const uploadDirPeminjaman = path.join(__dirname, '..', 'uploads', 'peminjaman');
+if (!fs.existsSync(uploadDirPeminjaman)) {
+  fs.mkdirSync(uploadDirPeminjaman, { recursive: true });
+}
+
+const fotoPeminjamanStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDirPeminjaman),
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+const uploadFotoPeminjaman = multer({ storage: fotoPeminjamanStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+
 // ===== GET semua peminjaman (dengan filter) =====
 router.get('/', verifyToken, async (req, res) => {
   try {
     const { status, search } = req.query;
 
     let query = `
-      SELECT p.*, b.nama_barang, b.kode_barang, b.serial_number,
+      SELECT p.*, b.nama_barang, b.merk, b.tipe, b.kode_barang, b.nomor_inventaris_ga,
+             b.serial_number, b.part_number, b.penanggung_jawab, b.lokasi, b.program_project,
              u.nama as peminjam, u.divisi as unit
       FROM peminjaman p
       JOIN barang b ON p.barang_id = b.id
@@ -39,23 +58,22 @@ router.get('/', verifyToken, async (req, res) => {
 });
 
 // ===== AJUKAN peminjaman baru =====
-router.post('/', verifyToken, async (req, res) => {
+router.post('/', verifyToken, uploadFotoPeminjaman.single('fotoSebelum'), async (req, res) => {
   try {
     const { barangId, tanggalPinjam, tanggalRencanaKembali, keperluan } = req.body;
     const userId = req.user.id;
+    const fotoSebelum = req.file ? `/uploads/peminjaman/${req.file.filename}` : null;
 
     if (!barangId || !tanggalPinjam) {
       return res.status(400).json({ success: false, data: null, message: 'Barang dan tanggal pinjam wajib diisi' });
     }
 
-    // Cek barang ada dan ambil kondisi + status terkini
     const [barangRows] = await pool.query('SELECT id, kondisi, status FROM barang WHERE id = ?', [barangId]);
     if (barangRows.length === 0) {
       return res.status(404).json({ success: false, data: null, message: 'Barang tidak ditemukan' });
     }
     const barang = barangRows[0];
 
-    // Cek barang spesifik ini masih ada peminjaman aktif (belum Selesai/Ditolak)
     const [activeLoans] = await pool.query(
       `SELECT id FROM peminjaman WHERE barang_id = ? AND status IN ('Menunggu Persetujuan','Disetujui','Dipinjam','Menunggu Verifikasi')`,
       [barangId]
@@ -65,9 +83,9 @@ router.post('/', verifyToken, async (req, res) => {
     }
 
     const [result] = await pool.query(
-      `INSERT INTO peminjaman (barang_id, user_id, tanggal_pinjam, tanggal_rencana_kembali, keperluan, kondisi_awal)
-       VALUES (?, ?, ?, ?, ?, ?)`,
-      [barangId, userId, tanggalPinjam, tanggalRencanaKembali || null, keperluan || null, barang.kondisi]
+      `INSERT INTO peminjaman (barang_id, user_id, tanggal_pinjam, tanggal_rencana_kembali, keperluan, kondisi_awal, foto_sebelum)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      [barangId, userId, tanggalPinjam, tanggalRencanaKembali || null, keperluan || null, barang.kondisi, fotoSebelum]
     );
 
     res.json({ success: true, data: { id: result.insertId }, message: 'Peminjaman berhasil diajukan, menunggu persetujuan' });
@@ -82,7 +100,7 @@ router.put('/:id/persetujuan', verifyToken, requireAdmin, async (req, res) => {
   const conn = await pool.getConnection();
   try {
     const { id } = req.params;
-    const { disetujui } = req.body; // true atau false
+    const { disetujui } = req.body;
     const adminId = req.user.id;
 
     const [rows] = await conn.query('SELECT * FROM peminjaman WHERE id = ?', [id]);
@@ -126,10 +144,11 @@ router.put('/:id/persetujuan', verifyToken, requireAdmin, async (req, res) => {
 });
 
 // ===== AJUKAN pengembalian (user) =====
-router.put('/:id/kembalikan', verifyToken, async (req, res) => {
+router.put('/:id/kembalikan', verifyToken, uploadFotoPeminjaman.single('fotoSesudah'), async (req, res) => {
   try {
     const { id } = req.params;
     const { tanggalKembaliAktual, kondisiSaatKembali, catatanPengembalian } = req.body;
+    const fotoSesudah = req.file ? `/uploads/peminjaman/${req.file.filename}` : null;
 
     const [rows] = await pool.query('SELECT * FROM peminjaman WHERE id = ?', [id]);
     if (rows.length === 0) {
@@ -140,9 +159,9 @@ router.put('/:id/kembalikan', verifyToken, async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE peminjaman SET status='Menunggu Verifikasi', tanggal_kembali_aktual=?, kondisi_saat_kembali=?, catatan_pengembalian=?
+      `UPDATE peminjaman SET status='Menunggu Verifikasi', tanggal_kembali_aktual=?, kondisi_saat_kembali=?, catatan_pengembalian=?, foto_sesudah=?
        WHERE id=?`,
-      [tanggalKembaliAktual || new Date().toISOString().split('T')[0], kondisiSaatKembali, catatanPengembalian || null, id]
+      [tanggalKembaliAktual || new Date().toISOString().split('T')[0], kondisiSaatKembali, catatanPengembalian || null, fotoSesudah, id]
     );
 
     res.json({ success: true, data: { id }, message: 'Pengembalian diajukan, menunggu verifikasi admin' });
@@ -175,7 +194,6 @@ router.put('/:id/verifikasi', verifyToken, requireAdmin, async (req, res) => {
       [adminId, id]
     );
 
-    // Barang balik ke inventory, kondisi & status di-update sesuai kondisi saat kembali
     await conn.query(
       `UPDATE barang SET status='Disimpan', kondisi=? WHERE id=?`,
       [pinjam.kondisi_saat_kembali, pinjam.barang_id]
@@ -202,7 +220,6 @@ router.put('/:id/verifikasi', verifyToken, requireAdmin, async (req, res) => {
 router.post('/export', verifyToken, async (req, res) => {
   try {
     const { format, jenisTransaksi, tanggalMulai, tanggalSelesai, status } = req.body;
-    // jenisTransaksi: 'semua' | 'peminjaman' | 'pengembalian'
 
     let query = `
       SELECT p.*, b.nama_barang, b.kode_barang, u.nama as peminjam, u.divisi as unit
@@ -314,6 +331,102 @@ router.post('/export', verifyToken, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Gagal export peminjaman' });
+  }
+});
+
+// ===== GET jumlah peminjaman user yang masih menunggu approval/verifikasi =====
+router.get('/menunggu-saya', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const [rows] = await pool.query(
+      `SELECT COUNT(*) as jumlah FROM peminjaman WHERE user_id = ? AND status IN ('Menunggu Persetujuan','Menunggu Verifikasi')`,
+      [userId]
+    );
+    res.json({ success: true, data: { jumlah: rows[0].jumlah }, message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, data: null, message: 'Server error' });
+  }
+});
+
+// ===== GET daftar peminjaman AKTIF milik user yang login (untuk "barang perlu dikembalikan") =====
+router.get('/milik-saya', verifyToken, async (req, res) => {
+  try {
+    const userId = req.user.id;
+    
+    // Ambil SEMUA field yang dibutuhkan dari tabel barang dan users
+    const [rows] = await pool.query(
+      `SELECT 
+        p.*,
+        b.nama_barang,
+        b.merk,
+        b.tipe,
+        b.kode_barang,
+        b.nomor_inventaris_ga,
+        b.serial_number,
+        b.part_number,
+        b.penanggung_jawab,
+        b.lokasi,
+        b.program_project,
+        b.kondisi as kondisi_barang,
+        u.nama as peminjam,
+        u.divisi as unit
+       FROM peminjaman p
+       JOIN barang b ON p.barang_id = b.id
+       JOIN users u ON p.user_id = u.id
+       WHERE p.user_id = ? AND p.status = 'Dipinjam'
+       ORDER BY p.tanggal_rencana_kembali ASC`,
+      [userId]
+    );
+
+    console.log(`📊 Found ${rows.length} active loans for user ${userId}`);
+
+    const data = rows.map(r => {
+      let sisaHari = null;
+      let terlambat = false;
+      
+      if (r.tanggal_rencana_kembali) {
+        const today = new Date();
+        const target = new Date(r.tanggal_rencana_kembali);
+        sisaHari = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+        terlambat = sisaHari < 0;
+      }
+      
+      return {
+        id: r.id,
+        // Data dari tabel peminjaman
+        tanggalPinjam: r.tanggal_pinjam,
+        tanggalRencanaKembali: r.tanggal_rencana_kembali,
+        tanggalKembaliAktual: r.tanggal_kembali_aktual,
+        keperluan: r.keperluan,
+        kondisiAwal: r.kondisi_awal,
+        fotoSebelum: r.foto_sebelum,
+        status: r.status,
+        // Data dari tabel barang
+        namaBarang: r.nama_barang,
+        merk: r.merk,
+        tipe: r.tipe,
+        kodeBarang: r.kode_barang,
+        nomorInventarisGa: r.nomor_inventaris_ga,
+        serialNumber: r.serial_number,
+        partNumber: r.part_number,
+        penanggungJawab: r.penanggung_jawab,
+        lokasi: r.lokasi,
+        programProject: r.program_project,
+        kondisiBarang: r.kondisi_barang,
+        // Data dari tabel users
+        peminjam: r.peminjam,
+        unit: r.unit,
+        // Hitungan
+        sisaHari,
+        terlambat
+      };
+    });
+
+    res.json({ success: true, data, message: '' });
+  } catch (err) {
+    console.error('❌ Error fetching user loans:', err);
+    res.status(500).json({ success: false, data: null, message: 'Server error: ' + err.message });
   }
 });
 

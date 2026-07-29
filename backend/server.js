@@ -10,6 +10,7 @@ const barangRoutes = require('./routes/barangRoutes');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
 async function testConnection() {
   try {
@@ -67,7 +68,7 @@ app.post('/api/auth/login', async (req, res) => {
     );
     res.json({
       success: true,
-      data: { token, user: { id: user.id, nama: user.nama, email: user.email, role: user.role } },
+      data: { token, user: { id: user.id, nama: user.nama, email: user.email, role: user.role, divisi: user.divisi } },
       message: 'Login berhasil'
     });
   } catch (err) {
@@ -84,6 +85,8 @@ const ruanganRoutes = require('./routes/ruanganRoutes');
 app.use('/api/ruangan', ruanganRoutes);
 const peminjamanRoutes = require('./routes/peminjamanRoutes');
 app.use('/api/peminjaman', peminjamanRoutes);
+const riwayatRoutes = require('./routes/riwayatRoutes');
+app.use('/api/riwayat', riwayatRoutes);
 
 app.listen(process.env.PORT || 5000, () => {
   console.log(`🚀 Server jalan di http://localhost:${process.env.PORT || 5000}`);

@@ -44,18 +44,61 @@ router.get('/', verifyToken, async (req, res) => {
     jumlah: statusMap[status] || 0
     }));
 
+    const [[{ approvalPinjam }]] = await pool.query(
+      `SELECT COUNT(*) as approvalPinjam FROM peminjaman WHERE status = 'Menunggu Persetujuan'`
+    );
+    const [[{ approvalRuang }]] = await pool.query(
+      `SELECT COUNT(*) as approvalRuang FROM booking_ruangan WHERE status = 'Menunggu'`
+    );
+
+    const [pinjamRows] = await pool.query(
+      `SELECT p.id, b.nama_barang, u.nama as peminjam, u.divisi, p.tanggal_pinjam
+      FROM peminjaman p
+      JOIN barang b ON p.barang_id = b.id
+      JOIN users u ON p.user_id = u.id
+      WHERE p.status = 'Menunggu Persetujuan'
+      ORDER BY p.dibuat_pada DESC`
+    );
+    const [ruangRows] = await pool.query(
+      `SELECT br.id, r.nama_ruangan, u.nama as peminjam, u.divisi, br.tanggal
+      FROM booking_ruangan br
+      JOIN ruangan r ON br.ruangan_id = r.id
+      JOIN users u ON br.user_id = u.id
+      WHERE br.status = 'Menunggu'
+      ORDER BY br.diajukan_pada DESC`
+    );
+
+    const menungguApproval = [
+      ...pinjamRows.map(r => ({
+        id: r.id,
+        jenis: 'peminjaman',
+        nama: r.nama_barang,
+        peminjam: r.peminjam,
+        divisi: r.divisi,
+        tanggal: r.tanggal_pinjam
+      })),
+      ...ruangRows.map(r => ({
+        id: r.id,
+        jenis: 'booking',
+        nama: r.nama_ruangan,
+        peminjam: r.peminjam,
+        divisi: r.divisi,
+        tanggal: r.tanggal
+      }))
+    ];
+
     res.json({
       success: true,
       data: {
         totalBarang,
         totalUser,
         programAktif,
-        approvalPinjam: 0,  // sementara, nunggu tabel peminjaman aktif dipakai
-        approvalRuang: 0,   // sementara, nunggu tabel booking ruangan
+        approvalPinjam,
+        approvalRuang,
         barangRusak,
         barangPerProgram: perProgram,
         barangPerStatus: perStatus,
-        menungguApproval: [] // sementara kosong, nunggu fitur peminjaman
+        menungguApproval
       },
       message: ''
     });

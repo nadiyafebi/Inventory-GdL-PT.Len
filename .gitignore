@@ -1,0 +1,7 @@
+# Abaikan folder frontend
+FRONTEND-INVENTORY/
+FRONTEND-INVENTORY - Copy/
+
+# Abaikan file sensitif & berat di dalam backend
+backend/node_modules/
+backend/.env
