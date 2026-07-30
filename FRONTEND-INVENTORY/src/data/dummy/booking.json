@@ -1,0 +1,58 @@
+[
+  {
+    "id": "BKG-0001",
+    "ruangan": "Workshop 1 (Gedung L)",
+    "pemesan": "Nanda",
+    "unit": "PDC",
+    "tanggal": "15/07/26",
+    "jamMulai": "09:00",
+    "jamSelesai": "11:00",
+    "keperluan": "Pengujian modul radar",
+    "status": "Menunggu Approval"
+  },
+  {
+    "id": "BKG-0002",
+    "ruangan": "Meeting Room",
+    "pemesan": "Amanda",
+    "unit": "PDC",
+    "tanggal": "15/07/26",
+    "jamMulai": "13:00",
+    "jamSelesai": "14:00",
+    "keperluan": "Rapat koordinasi sprint",
+    "status": "Disetujui"
+  },
+  {
+    "id": "BKG-0003",
+    "ruangan": "Workshop 2 (Gedung L)",
+    "pemesan": "Dania",
+    "unit": "PDC",
+    "tanggal": "16/07/26",
+    "jamMulai": "10:00",
+    "jamSelesai": "12:00",
+    "keperluan": "Pengecekan perangkat sebelum demo",
+    "status": "Bentrok",
+    "konflikDengan": "Workshop Radar (14/07/26, 10:00 - 12:00) oleh Grey"
+  },
+  {
+    "id": "BKG-0004",
+    "ruangan": "Ruang Meeting",
+    "pemesan": "Lira",
+    "unit": "PDC",
+    "tanggal": "16/07/26",
+    "jamMulai": "15:00",
+    "jamSelesai": "16:00",
+    "keperluan": "Diskusi WBS proyek",
+    "status": "Disetujui"
+  },
+  {
+    "id": "BKG-0005",
+    "ruangan": "Workshop (Gedung L)",
+    "pemesan": "Dio",
+    "unit": "PDC",
+    "tanggal": "17/07/26",
+    "jamMulai": "08:00",
+    "jamSelesai": "10:00",
+    "keperluan": "Kalibrasi alat ukur",
+    "status": "Selesai"
+  }
+]

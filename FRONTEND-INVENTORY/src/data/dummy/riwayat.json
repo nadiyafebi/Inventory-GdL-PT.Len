@@ -1,0 +1,18 @@
+[
+  {
+    "id": 1,
+    "waktu": "2026-07-08 11:20",
+    "aktivitas": "Dipinjam",
+    "barang": "Antena",
+    "pengguna": "Amanda",
+    "divisi": "PDC"
+  },
+  {
+    "id": 2,
+    "waktu": "2026-07-05 12:45",
+    "aktivitas": "Diperbaiki",
+    "barang": "Wifi",
+    "pengguna": "Admin",
+    "divisi": "PDC"
+  }
+]

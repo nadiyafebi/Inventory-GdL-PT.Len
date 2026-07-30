@@ -1,0 +1,56 @@
+[
+  {
+    "id": 1,
+    "nama": "Signal Generator",
+    "program": "Workshop Radar (Astacita)",
+    "merk": "-",
+    "status": "Dipasang",
+    "kondisi": "Belum siap",
+    "lokasi": "Workshop 1 Ged L Lt1"
+  },
+  {
+    "id": 2,
+    "nama": "Microwave Link (MWL) S + Stand",
+    "program": "Radar Pasif (Era, Cheko)",
+    "merk": "MIL",
+    "status": "Disimpan",
+    "kondisi": "Belum siap",
+    "lokasi": "Ged L Lt1"
+  },
+  {
+    "id": 3,
+    "nama": "Universal Military Module + Stand",
+    "program": "Radar Pasif (Era, Cheko)",
+    "merk": "-",
+    "status": "Dipinjam",
+    "kondisi": "Bekas",
+    "lokasi": "Workshop Radar Pasif Subang"
+  },
+  {
+    "id": 4,
+    "nama": "Portable Server",
+    "program": "Radar Pasif (Era, Cheko)",
+    "merk": "-",
+    "status": "Disimpan",
+    "kondisi": "Belum siap",
+    "lokasi": "Ged L Lt1"
+  },
+  {
+    "id": 5,
+    "nama": "Humidity Meter",
+    "program": "Radar Pasif (Era, Cheko)",
+    "merk": "FanUu",
+    "status": "Diperbaiki",
+    "kondisi": "Belum siap",
+    "lokasi": "Ged L Lt1"
+  },
+  {
+    "id": 6,
+    "nama": "Spectrum Analyzer",
+    "program": "Workshop Radar (Astacita)",
+    "merk": "MIL",
+    "status": "Disimpan",
+    "kondisi": "Belum siap",
+    "lokasi": "Workshop 2 Ged L Lt1"
+  }
+]
