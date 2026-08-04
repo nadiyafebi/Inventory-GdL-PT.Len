@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { X, ChevronDown, Check, Upload, Image as ImageIcon, FileText, Trash2 } from 'lucide-react'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS, KONDISI_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.16.13.165:5000/api'
+const API_BASE = 'http://172.20.10.8:5000/api'
 
 export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({
@@ -222,7 +222,7 @@ export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
             <input type="number" min="1" name="quantity" value={form.quantity} onChange={handleChange} className={inputClass} />
           </div>
 
-          {/* ===== FOTO BARANG (galeri, banyak foto) ===== */}
+          {/* ===== FOTO BARANG ===== */}
           <div className="flex flex-col gap-1.5 pt-2 border-t border-gray-100">
             <label className={`${labelClass} flex items-center gap-1`}><ImageIcon size={12} /> Foto Barang</label>
             {pendingFoto.length > 0 && (
@@ -238,11 +238,18 @@ export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
                 ))}
               </div>
             )}
-            <input type="file" accept="image/*" multiple onChange={handleAddFoto}
-              className="text-[10px] text-gray-500 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-[#005CA9] hover:file:bg-blue-100 cursor-pointer" />
+            <div className="flex items-center gap-3">
+              <label className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#005CA9] text-[10px] font-bold rounded-lg border border-blue-200 cursor-pointer transition-colors shrink-0">
+                Pilih File
+                <input type="file" accept="image/*" multiple onChange={handleAddFoto} className="hidden" />
+              </label>
+              <span className="text-[10px] text-gray-500 font-medium truncate">
+                {pendingFoto.length === 0 ? 'Tidak ada file yang dipilih' : `${pendingFoto.length} file dipilih`}
+              </span>
+            </div>
           </div>
 
-          {/* ===== MANUAL BOOK (PDF/foto, banyak file) ===== */}
+          {/* ===== MANUAL BOOK ===== */}
           <div className="flex flex-col gap-1.5">
             <label className={`${labelClass} flex items-center gap-1`}><FileText size={12} /> Manual Book</label>
             {pendingManualBook.length > 0 && (
@@ -257,8 +264,15 @@ export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
                 ))}
               </div>
             )}
-            <input type="file" accept="application/pdf,image/*" multiple onChange={handleAddManualBook}
-              className="text-[10px] text-gray-500 file:mr-2 file:py-1.5 file:px-2.5 file:rounded-lg file:border-0 file:text-[10px] file:font-bold file:bg-blue-50 file:text-[#005CA9] hover:file:bg-blue-100 cursor-pointer" />
+            <div className="flex items-center gap-3">
+              <label className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#005CA9] text-[10px] font-bold rounded-lg border border-blue-200 cursor-pointer transition-colors shrink-0">
+                Pilih File
+                <input type="file" accept="application/pdf,image/*" multiple onChange={handleAddManualBook} className="hidden" />
+              </label>
+              <span className="text-[10px] text-gray-500 font-medium truncate">
+                {pendingManualBook.length === 0 ? 'Tidak ada file yang dipilih' : `${pendingManualBook.length} file dipilih`}
+              </span>
+            </div>
           </div>
 
           <div className="flex justify-end gap-2.5 pt-2 border-t border-gray-100 mt-2">
