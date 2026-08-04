@@ -75,7 +75,6 @@ export default function DetailBarangModal({ isOpen, onClose, data, onEdit }) {
           </div>
 
           <DetailRow label="Lokasi" value={data.lokasi} />
-          <DetailRow label="Catatan" value={data.catatan} />
 
           {/* ===== GALERI FOTO BARANG ===== */}
           <div className="flex flex-col gap-2 pt-2">

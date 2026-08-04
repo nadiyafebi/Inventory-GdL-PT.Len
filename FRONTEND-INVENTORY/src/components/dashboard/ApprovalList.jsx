@@ -3,10 +3,10 @@ import React from 'react';
 export default function ApprovalList({ items = [], onApproveClick, onRejectClick }) {
   return (
     <div className="bg-white rounded-xl p-5 shadow-md">
-      <h3 className="text-sm font-bold text-gray-800 mb-4">MENUNGGU APPROVAL</h3>
+      <h3 className="text-sm font-bold text-gray-800 mb-4">MENUNGGU PERSETUJUAN</h3>
       
       {items.length === 0 ? (
-        <p className="text-xs text-gray-400">Tidak ada pending approval</p>
+        <p className="text-xs text-gray-400">Tidak ada pending Persetujuan</p>
       ) : (
         <div className="flex flex-col gap-3">
           {items.map((item) => (

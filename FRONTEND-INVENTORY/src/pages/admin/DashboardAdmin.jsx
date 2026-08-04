@@ -34,10 +34,10 @@ export default function DashboardAdmin() {
 
           setStats([
             { label: 'Total Barang', value: d.totalBarang || 0 },
-            { label: 'Total User', value: d.totalUser || 0 },
+            { label: 'Total Pengguna', value: d.totalUser || 0 },
             { label: 'Program Aktif', value: d.programAktif || 0 },
-            { label: 'Approval Pinjam', value: d.approvalPinjam || 0 },
-            { label: 'Approval Ruang', value: d.approvalRuang || 0 },
+            { label: 'Persetujuan Pinjam', value: d.approvalPinjam || 0 },
+            { label: 'Persetujuan Ruang', value: d.approvalRuang || 0 },
             { label: 'Barang Rusak', value: d.barangRusak || 0 },
           ]);
 
@@ -65,8 +65,8 @@ export default function DashboardAdmin() {
       { label: 'Total Barang', value: 120 },
       { label: 'Total User', value: 15 },
       { label: 'Program Aktif', value: 4 },
-      { label: 'Approval Pinjam', value: 2 },
-      { label: 'Approval Ruang', value: 1 },
+      { label: 'Persetujuan Pinjam', value: 2 },
+      { label: 'Persetujuan Ruang', value: 1 },
       { label: 'Barang Rusak', value: 3 },
     ]);
     setProgramData([
@@ -179,7 +179,7 @@ export default function DashboardAdmin() {
 
       <div className={`
         flex-1 w-full transition-all duration-300 ease-in-out
-        md:ml-[320px] md:w-[calc(100%-320px)]
+        md:ml-[288px] md:w-[calc(100%-288px)]
         px-4 sm:px-6 md:px-8 
         py-4 sm:py-6 md:py-8
         flex flex-col gap-4 md:gap-5

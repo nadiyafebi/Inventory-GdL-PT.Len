@@ -86,7 +86,7 @@ const Login = () => {
                   Sistem Inventaris PDC
                 </h2>
                 <p className="text-gray-500 text-xs font-medium tracking-wide">
-                  Log in to access the system
+                  Masuk untuk mengakses sistem
                 </p>
               </div>
 
@@ -106,19 +106,19 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#00429b]"
-                    placeholder="admin@test.com"
+                    placeholder="Alamat Email"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Password</label>
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Kata Sandi</label>
                   <input
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     className="w-full px-4 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:border-[#00429b]"
-                    placeholder="••••••••"
+                    placeholder="Kata Sandi"
                     required
                   />
                 </div>
@@ -126,9 +126,9 @@ const Login = () => {
                 <div className="flex items-center justify-between text-xs text-gray-600">
                   <label className="flex items-center space-x-2 cursor-pointer">
                     <input type="checkbox" className="rounded border-gray-300 text-[#00429b] focus:ring-[#00429b]" />
-                    <span>Remember me</span>
+                    <span>Ingat saya</span>
                   </label>
-                  <a href="#forgot" className="text-[#00429b] hover:underline">Forgot password?</a>
+                  <a href="#forgot" className="text-[#00429b] hover:underline">Lupa kata sandi?</a>
                 </div>
 
                 <div className="pt-2">
@@ -139,7 +139,7 @@ const Login = () => {
                       loading ? 'opacity-50 cursor-not-allowed' : ''
                     }`}
                   >
-                    {loading ? 'Memproses...' : 'Sign in'}
+                    {loading ? 'Memproses...' : 'Masuk'}
                   </button>
                 </div>
 

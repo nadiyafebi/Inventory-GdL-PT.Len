@@ -165,7 +165,7 @@ export default function FilterRuangan() {
     <div className="flex flex-col md:flex-row min-h-screen bg-white font-sans overflow-hidden">
       <Sidebar />
 
-      <main className="flex-1 w-full transition-all duration-300 ease-in-out md:ml-[320px] md:w-[calc(100%-320px)] bg-[#005CA9] px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 overflow-y-auto min-h-screen">
+      <main className="flex-1 w-full transition-all duration-300 ease-in-out md:ml-[288px] md:w-[calc(100%-320px)] bg-[#005CA9] px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 overflow-y-auto min-h-screen">
         <h2 className="text-center md:text-left text-lg sm:text-xl font-semibold text-white mb-4 md:mb-6">
           Filter Ruangan
         </h2>

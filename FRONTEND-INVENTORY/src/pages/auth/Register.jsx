@@ -130,7 +130,7 @@ const Register = () => {
                     value={form.email}
                     onChange={handleChange('email')}
                     className="w-full px-4 py-2 text-xs border border-gray-300 rounded-md focus:outline-none focus:border-[#00429b]"
-                    placeholder="email@gmail.com"
+                    placeholder="Email"
                     required
                   />
                 </div>

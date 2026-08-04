@@ -107,7 +107,7 @@ export default function CatatBookingRuangan() {
 
       <div className={`
         flex-1 w-full transition-all duration-300 ease-in-out
-        md:ml-[320px] md:w-[calc(100%-320px)]
+        md:ml-[288px] md:w-[calc(100%-320px)]
         px-4 sm:px-6 md:px-8 
         py-4 sm:py-6 md:py-8
         flex flex-col gap-4 md:gap-5
@@ -138,7 +138,7 @@ export default function CatatBookingRuangan() {
               placeholder="Cari nama ruangan..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full text-xs pl-10 pr-4 py-3 border-none rounded-lg bg-white shadow-sm focus:outline-none placeholder-gray-400 text-gray-700 font-medium"
+              className="w-full text-xs pl-10 pr-5 py-3 border-none rounded-full bg-white shadow-sm focus:outline-none placeholder-gray-400 text-gray-700 font-medium"
             />
             <div className="absolute left-3.5 top-3 flex items-center justify-center pointer-events-none text-gray-400">
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-4 h-4">
@@ -185,7 +185,7 @@ export default function CatatBookingRuangan() {
               onClick={() => { setShowStatusDropdown(!showStatusDropdown); setShowRoomDropdown(false); }}
               className="w-full sm:w-auto px-4 sm:px-6 py-3 rounded-full border-0 text-xs font-medium bg-white text-gray-600 flex items-center justify-between shadow-sm hover:bg-gray-50 cursor-pointer min-w-[130px] sm:min-w-[150px]"
             >
-              <span className="truncate">{statusFilter || 'Semua status'}</span>
+              <span className="truncate">{statusFilter || 'Semua Persetujuan'}</span>
               <span className="text-[9px] text-gray-400 ml-2 flex-shrink-0">▼</span>
             </button>
             {showStatusDropdown && (
@@ -234,7 +234,7 @@ export default function CatatBookingRuangan() {
                   <th className="p-3 sm:p-4 hidden lg:table-cell">Tanggal</th>
                   <th className="p-3 sm:p-4">Jam</th>
                   <th className="p-3 sm:p-4 hidden xl:table-cell">Keperluan</th>
-                  <th className="p-3 sm:p-4">Approval</th>
+                  <th className="p-3 sm:p-4">Persetujuan</th>
                   <th className="p-3 sm:p-4 text-center">Aksi</th>
                 </tr>
               </thead>
@@ -252,7 +252,7 @@ export default function CatatBookingRuangan() {
                     </td>
                     <td className="p-3 sm:p-4 text-gray-600 max-w-[150px] truncate hidden xl:table-cell text-xs">{item.keperluan || '-'}</td>
                     <td className="p-3 sm:p-4">
-                      <span className={`inline-block px-2 sm:px-3 py-0.5 rounded-md text-[10px] font-bold ${
+                      <span className={`inline-block px-2 sm:px-4 py-1.5 rounded-full text-[10px] font-bold ${
                         item.status === 'Menunggu' ? 'bg-yellow-100 text-yellow-700' :
                         item.status === 'Disetujui' ? 'bg-green-100 text-green-700' :
                         item.status === 'Ditolak' ? 'bg-red-100 text-red-700' :
@@ -282,7 +282,7 @@ export default function CatatBookingRuangan() {
                       ) : (
                         <button
                           onClick={() => setSelectedBooking(item)}
-                          className="px-3 sm:px-4 py-1 bg-[#E2E8F0] text-gray-700 text-[10px] font-bold rounded-lg hover:bg-gray-300 shadow-xs transition-colors"
+                          className="px-3 sm:px-4 py-1.5 bg-[#E2E8F0] text-gray-700 text-[10px] font-bold rounded-full hover:bg-gray-300 shadow-xs transition-colors"
                         >
                           Detail
                         </button>

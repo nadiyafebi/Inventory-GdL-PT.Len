@@ -4,6 +4,19 @@ import { ImageIcon, X, CheckCircle2 } from 'lucide-react';
 const badgeBase = 'px-2.5 py-1 rounded-md text-xs font-semibold';
 const SERVER_BASE = 'http://172.16.13.165:5000';
 
+function formatTanggalJam(isoString) {
+  if (!isoString) return '-';
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return isoString;
+  return date.toLocaleString('id-ID', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 export default function DetailTransaksiModal({ isOpen, onClose, transaksi, onApprove, onReject, onVerifikasi }) {
   if (!isOpen || !transaksi) return null;
 
@@ -64,12 +77,12 @@ export default function DetailTransaksiModal({ isOpen, onClose, transaksi, onApp
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Tanggal pinjam</span>
-              <span className="font-medium text-gray-700">{transaksi.tanggalPinjam}</span>
+              <span className="font-medium text-gray-700">{formatTanggalJam(transaksi.tanggalPinjam)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-gray-400">Tanggal kembali</span>
               <span className="font-medium text-gray-700">
-                {transaksi.tanggalKembaliAktual || transaksi.tanggalKembaliRencana}
+                {formatTanggalJam(transaksi.tanggalKembaliAktual || transaksi.tanggalKembaliRencana)}
               </span>
             </div>
             <div className="flex justify-between">
@@ -86,7 +99,7 @@ export default function DetailTransaksiModal({ isOpen, onClose, transaksi, onApp
               <div className="flex justify-between">
                 <span className="text-gray-400">Diverifikasi oleh</span>
                 <span className="font-medium text-gray-700">
-                  {transaksi.diverifikasiOleh} {transaksi.tanggalVerifikasi || ''}
+                  {transaksi.diverifikasiOleh} {transaksi.tanggalVerifikasi ? `— ${formatTanggalJam(transaksi.tanggalVerifikasi)}` : ''}
                 </span>
               </div>
             )}

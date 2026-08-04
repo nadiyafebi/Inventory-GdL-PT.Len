@@ -29,7 +29,7 @@ export default function TransaksiTable({ data = [], onDetail, onApprove, onRejec
             <th className="p-4">Unit</th>
             <th className="p-4">Tanggal Pinjam</th>
             <th className="p-4">Rencana/Aktual Kembali</th>
-            <th className="p-4">Approval</th>
+            <th className="p-4">Persetujuan</th>
             <th className="p-4 text-center">Aksi</th>
           </tr>
         </thead>
@@ -44,7 +44,7 @@ export default function TransaksiTable({ data = [], onDetail, onApprove, onRejec
               <tr key={row.id} className="hover:bg-slate-50/60 transition-colors">
 
                 <td className="p-4 text-center">
-                  <span className="inline-block px-3 py-1 bg-[#E2E8F0] text-gray-600 rounded-full font-bold text-[10px] min-w-[55px]">
+                  <span className="inline-block px-4 py-1.5 bg-[#E2E8F0] text-gray-600 rounded-full font-bold text-[10px] min-w-[55px]">
                     {row.status || (row.tipe === 'peminjaman' ? 'Pinjam' : 'Kembali')}
                   </span>
                 </td>
@@ -78,7 +78,7 @@ export default function TransaksiTable({ data = [], onDetail, onApprove, onRejec
                 </td>
 
                 <td className="p-4">
-                  <span className="inline-block px-3 py-0.5 bg-[#E2E8F0] text-gray-700 rounded-md text-[10px] font-bold">
+                  <span className="inline-block px-4 py-1.5 bg-[#E2E8F0] text-gray-700 rounded-full text-[10px] font-bold min-w-[70px] text-center">
                     {row.approval || (isMenunggu ? 'Menunggu' : 'Disetujui')}
                   </span>
                 </td>
@@ -102,7 +102,7 @@ export default function TransaksiTable({ data = [], onDetail, onApprove, onRejec
                   ) : (
                     <button
                       onClick={() => onDetail?.(row)}
-                      className="px-4 py-1.5 bg-[#E2E8F0] text-gray-700 text-[10px] font-bold rounded-lg hover:bg-gray-300 shadow-xs transition-colors"
+                      className="px-5 py-1.5 bg-[#E2E8F0] text-gray-700 text-[10px] font-bold rounded-full hover:bg-gray-300 shadow-xs transition-colors"
                     >
                       Detail
                     </button>

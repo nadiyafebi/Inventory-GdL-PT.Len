@@ -204,7 +204,7 @@ export default function Riwayat() {
 
       <div className={`
         flex-1 w-full transition-all duration-300 ease-in-out
-        md:ml-[320px] md:w-[calc(100%-320px)]
+        md:ml-[288px] md:w-[calc(100%-320px)]
         px-4 sm:px-6 md:px-8 
         py-4 sm:py-6 md:py-8
         flex flex-col gap-4 md:gap-5

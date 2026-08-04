@@ -33,6 +33,9 @@ export default function MasterBarang() {
 
   const token = localStorage.getItem('token')
 
+  // ✅ TAMBAHAN: daftar program diambil dari data barang yang benar-benar ada
+  const programsFromData = [...new Set(barang.map((b) => b.program).filter(Boolean))]
+
   const fetchBarang = () => {
     fetch(`${API_BASE}/barang`, { headers: { Authorization: `Bearer ${token}` } })
       .then(res => res.json())
@@ -253,7 +256,7 @@ export default function MasterBarang() {
 
       <div className={`
         flex-1 w-full transition-all duration-300 ease-in-out
-        md:ml-[320px] md:w-[calc(100%-320px)]
+        md:ml-[288px] md:w-[calc(100%-288px)]
         px-4 sm:px-6 md:px-8 
         py-4 sm:py-6 md:py-8
         flex flex-col gap-4 md:gap-5
@@ -311,7 +314,8 @@ export default function MasterBarang() {
             {showProgramDropdown && (
               <div className="absolute left-0 mt-2 w-64 bg-white rounded-3xl shadow-2xl z-50 p-4 border border-gray-100 flex flex-col gap-2 max-h-[300px] overflow-y-auto">
                 <button onClick={() => { setProgramFilter('Semua Program'); setShowProgramDropdown(false); }} className="w-full py-2.5 rounded-full text-xs font-medium text-white bg-[#005CA9] hover:bg-[#004B8A] cursor-pointer">Semua Program</button>
-                {PROGRAM_OPTIONS.map(p => (
+                {/* ✅ DIUBAH: dari PROGRAM_OPTIONS.map(...) menjadi programsFromData.map(...) */}
+                {programsFromData.map(p => (
                   <button key={p} onClick={() => { setProgramFilter(p); setShowProgramDropdown(false); }} className="w-full py-2.5 rounded-full text-xs font-medium text-white bg-[#005CA9] hover:bg-[#004B8A] cursor-pointer">{p}</button>
                 ))}
               </div>
