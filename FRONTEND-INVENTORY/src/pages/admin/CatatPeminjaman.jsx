@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/common/Sidebar.jsx';
 
-const API_BASE = 'http://172.16.10.176:5000/api';
+const API_BASE = 'http://172.16.13.165:5000/api';
 
 function formatTanggal(dateStr) {
   if (!dateStr) return '-';

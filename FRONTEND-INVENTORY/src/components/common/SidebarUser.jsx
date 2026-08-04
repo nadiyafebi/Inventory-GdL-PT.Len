@@ -23,8 +23,8 @@ const iconStyles = {
 const defaultUserMenuItems = [
   { name: 'Dashboard', iconKey: 'dashboard', path: '/user/dashboard' },
   { name: 'Master Barang', iconKey: 'barang', path: '/user/master-barang' },
-  { name: 'Catat Peminjaman dan Pengembalian', iconKey: 'peminjaman', path: '/user/peminjaman' },
-  { name: 'Catat Booking Ruangan', iconKey: 'booking', path: '/user/booking-ruangan' },
+  { name: 'Peminjaman dan Pengembalian', iconKey: 'peminjaman', path: '/user/peminjaman' },
+  { name: 'Booking Ruangan', iconKey: 'booking', path: '/user/booking-ruangan' },
   { name: 'Filter Ruangan', iconKey: 'filterRuangan', path: '/user/filter-ruangan' },
 ];
 
@@ -128,8 +128,8 @@ const SidebarUser = ({
     <>
       <div className="px-5 py-4 border-b border-gray-100 flex flex-col gap-2 bg-white">
         <div className="flex justify-between items-center w-full">
-          <img src="/Logo Digantara.png" alt="Digantara" className="h-6 w-auto object-contain" />
-          <img src="/Logo Len.png" alt="LEN" className="h-7 w-auto object-contain" />
+          <img src="/Logo Digantara.png" alt="Digantara" className="h-8 w-auto object-contain" />
+          <img src="/Logo Len.png" alt="LEN" className="h-9 w-auto object-contain" />
         </div>
         <div className="w-full text-left">
           <h2 className="text-[11px] font-bold text-gray-800 tracking-wider uppercase">Inventory</h2>

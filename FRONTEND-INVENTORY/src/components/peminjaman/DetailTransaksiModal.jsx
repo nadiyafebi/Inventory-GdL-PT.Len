@@ -2,7 +2,7 @@ import React from 'react';
 import { ImageIcon, X, CheckCircle2 } from 'lucide-react';
 
 const badgeBase = 'px-2.5 py-1 rounded-md text-xs font-semibold';
-const SERVER_BASE = 'http://172.16.10.176:5000';
+const SERVER_BASE = 'http://172.16.13.165:5000';
 
 export default function DetailTransaksiModal({ isOpen, onClose, transaksi, onApprove, onReject, onVerifikasi }) {
   if (!isOpen || !transaksi) return null;

@@ -4,7 +4,7 @@ import {
   LayoutDashboard,
   Package,
   ClipboardList,
-  CalendarDays,
+  Calendar,
   History,
   Filter,
   LogOut,
@@ -17,7 +17,7 @@ const iconStyles = {
   dashboard: { icon: LayoutDashboard, bg: 'bg-blue-50', color: 'text-blue-600' },
   barang: { icon: Package, bg: 'bg-orange-50', color: 'text-orange-500' },
   peminjaman: { icon: ClipboardList, bg: 'bg-amber-50', color: 'text-amber-600' },
-  booking: { icon: CalendarDays, bg: 'bg-purple-50', color: 'text-purple-600' },
+  booking: { icon: Calendar, bg: 'bg-purple-50', color: 'text-purple-600' },
   riwayat: { icon: History, bg: 'bg-emerald-50', color: 'text-emerald-600' },
   filterRuangan: { icon: Filter, bg: 'bg-teal-50', color: 'text-teal-600' },
 };
@@ -25,8 +25,8 @@ const iconStyles = {
 const defaultMenuItems = [
   { name: 'Dashboard', iconKey: 'dashboard', path: '/admin/dashboard' },
   { name: 'Master Barang', iconKey: 'barang', path: '/admin/master-barang' },
-  { name: 'Peminjaman dan Pengembalian', iconKey: 'peminjaman', path: '/admin/peminjaman-pengembalian' },
-  { name: 'Booking Ruangan', iconKey: 'booking', path: '/admin/booking-ruangan' },
+  { name: 'Catat Peminjaman dan Pengembalian', iconKey: 'peminjaman', path: '/admin/peminjaman-pengembalian' },
+  { name: 'Catat Booking Ruangan', iconKey: 'booking', path: '/admin/booking-ruangan' },
   { name: 'Filter Ruangan', iconKey: 'filterRuangan', path: '/admin/filter-ruangan' },
   { name: 'Riwayat', iconKey: 'riwayat', path: '/admin/riwayat' },
 ];
@@ -34,17 +34,17 @@ const defaultMenuItems = [
 const FONT_STACK = "'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif";
 
 function navItemClass(isActive) {
-  const base = 'w-full flex items-center space-x-3 px-3 py-2.5 text-sm rounded-xl transition-colors';
+  const base = 'w-full flex items-center space-x-3 px-3 py-2.5 text-xs font-medium rounded-xl transition-colors';
   return isActive
     ? `${base} bg-[#E6F0FA] text-[#005CA9] font-semibold shadow-sm`
-    : `${base} text-gray-600 font-normal hover:bg-gray-50 hover:text-gray-900a`;
+    : `${base} text-gray-600 hover:bg-gray-50 hover:text-gray-900`;
 }
 
 function subNavItemClass(isActive) {
-  const base = 'block px-3 py-2 text-sm rounded-lg transition-colors';
+  const base = 'block px-3 py-2 text-xs font-medium rounded-lg transition-colors';
   return isActive
     ? `${base} bg-[#E6F0FA] text-[#005CA9] font-semibold`
-    : `${base} text-gray-500 font-normal hover:bg-gray-50`;
+    : `${base} text-gray-500 hover:bg-gray-50`;
 }
 
 function IconBadge({ iconKey }) {
@@ -74,10 +74,10 @@ const Sidebar = ({
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 1024);
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
-    
+
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
@@ -116,12 +116,12 @@ const Sidebar = ({
     <>
       <div className="px-5 py-4 border-b border-gray-100 flex flex-col gap-2 bg-white">
         <div className="flex justify-between items-center w-full">
-          <img src="/Logo Digantara.png" alt="Digantara" className="h-6 w-auto object-contain" />
-          <img src="/Logo Len.png" alt="LEN" className="h-7 w-auto object-contain" />
+          <img src="/Logo Digantara.png" alt="Digantara" className="h-8 w-auto object-contain" />
+          <img src="/Logo Len.png" alt="LEN" className="h-9 w-auto object-contain" />
         </div>
         <div className="w-full text-left">
-          <h2 className="text-sm font-bold text-gray-800 tracking-wide uppercase">Inventory</h2>
-          <p className="text-[10px] text-gray-500 font-semibold leading-relaxed">
+          <h2 className="text-[11px] font-bold text-gray-800 tracking-wider uppercase">Inventory</h2>
+          <p className="text-[11px] text-gray-500 font-medium">
             Workshop Radar & Electronic Warfare
           </p>
         </div>
@@ -137,7 +137,7 @@ const Sidebar = ({
                   <button
                     type="button"
                     onClick={() => setOpenGroup(isOpen ? null : item.name)}
-                    className="w-full flex items-center justify-between px-3 py-2.5 text-sm font-normal rounded-xl transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    className="w-full flex items-center justify-between px-3 py-2.5 text-xs font-medium rounded-xl transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900 cursor-pointer"
                   >
                     <div className="flex items-center space-x-3">
                       <IconBadge iconKey={item.iconKey} />
@@ -199,7 +199,7 @@ const Sidebar = ({
             type="button"
             onClick={() => setShowLogoutConfirm(true)}
             title="Logout"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors shrink-0 ml-2"
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-red-50 hover:text-red-500 transition-colors shrink-0 ml-2 cursor-pointer"
           >
             <LogOut size={16} />
           </button>
@@ -214,7 +214,7 @@ const Sidebar = ({
         <button
           id="sidebar-toggle"
           onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="fixed top-4 left-4 z-30 p-2.5 bg-white rounded-xl shadow-lg border border-gray-200 hover:bg-gray-50 transition-all duration-200 lg:hidden"
+          className="fixed top-4 left-4 z-30 p-2.5 bg-white rounded-xl shadow-lg border border-gray-200 hover:bg-gray-50 transition-all duration-200 lg:hidden cursor-pointer"
           aria-label="Toggle sidebar"
         >
           {isMobileOpen ? (
@@ -226,7 +226,7 @@ const Sidebar = ({
       )}
 
       {isMobile && isMobileOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
           onClick={() => setIsMobileOpen(false)}
         />
@@ -234,7 +234,7 @@ const Sidebar = ({
 
       {!isMobile && (
         <div
-          className="w-80 h-screen bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 z-20 select-none shadow-sm"
+          className="w-72 h-screen bg-white border-r border-gray-200 flex flex-col fixed left-0 top-0 z-20 select-none shadow-sm"
           style={{ fontFamily: FONT_STACK }}
         >
           {sidebarContent}
@@ -244,7 +244,7 @@ const Sidebar = ({
       {isMobile && (
         <div
           id="mobile-sidebar"
-          className={`fixed top-0 left-0 h-full w-80 bg-white border-r border-gray-200 flex flex-col z-50 select-none shadow-2xl transition-transform duration-300 ease-in-out ${
+          className={`fixed top-0 left-0 h-full w-72 bg-white border-r border-gray-200 flex flex-col z-50 select-none shadow-2xl transition-transform duration-300 ease-in-out ${
             isMobileOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
           style={{ fontFamily: FONT_STACK }}
@@ -267,14 +267,14 @@ const Sidebar = ({
               <button
                 type="button"
                 onClick={() => setShowLogoutConfirm(false)}
-                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition"
+                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-gray-100 text-gray-700 hover:bg-gray-200 transition cursor-pointer"
               >
                 Batal
               </button>
               <button
                 type="button"
                 onClick={handleLogout}
-                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 shadow-md transition"
+                className="w-full py-2.5 rounded-xl text-xs font-semibold bg-red-500 text-white hover:bg-red-600 shadow-md transition cursor-pointer"
               >
                 Logout
               </button>
@@ -287,5 +287,4 @@ const Sidebar = ({
   );
 };
 
-// TAMBAHKAN BARIS INI DI SINI:
 export default Sidebar;

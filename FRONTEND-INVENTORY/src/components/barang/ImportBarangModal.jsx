@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { X, Upload, FileSpreadsheet, Check, AlertCircle } from 'lucide-react'
 
-const API_BASE = 'http://172.16.10.176:5000/api'
+const API_BASE = 'http://172.16.13.165:5000/api'
 
 export default function ImportBarangModal({ isOpen, onClose, onSuccess }) {
   const [file, setFile] = useState(null)

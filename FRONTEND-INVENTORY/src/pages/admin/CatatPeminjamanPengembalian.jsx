@@ -4,7 +4,7 @@ import Sidebar from '../../components/common/Sidebar.jsx';
 import TransaksiTable from '../../components/peminjaman/TransaksiTable.jsx';
 import DetailTransaksiModal from '../../components/peminjaman/DetailTransaksiModal.jsx';
 
-const API_BASE = 'http://172.16.10.176:5000/api';
+const API_BASE = 'http://172.16.13.165:5000/api';
 
 const STATUS_OPTIONS = [
   'Menunggu Approval', 'Dipinjam', 'Ditolak', 'Cek Kembali', 'Selesai', 'Terlambat'

@@ -24,7 +24,7 @@ export default function DashboardAdmin() {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    fetch('http://172.16.10.176:5000/api/dashboard', {
+    fetch('http://172.16.13.165:5000/api/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -142,7 +142,7 @@ export default function DashboardAdmin() {
 
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://172.16.10.176:5000/api/peminjaman/${rejectTarget.id}/persetujuan`, {
+      const res = await fetch(`http://172.16.13.165:5000/api/peminjaman/${rejectTarget.id}/persetujuan`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ disetujui: false })

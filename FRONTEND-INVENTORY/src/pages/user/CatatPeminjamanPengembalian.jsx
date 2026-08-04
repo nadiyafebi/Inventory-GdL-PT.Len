@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { Camera, Check, ChevronDown, ArrowLeft, Search } from 'lucide-react';
 
-const API_BASE = 'http://172.16.10.176:5000/api';
+const API_BASE = 'http://172.16.13.165:5000/api';
 
 export default function CatatPeminjamanPengembalianUser() {
   const token = localStorage.getItem('token');

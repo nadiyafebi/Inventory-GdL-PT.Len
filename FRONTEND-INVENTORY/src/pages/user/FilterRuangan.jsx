@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-const API_BASE = 'http://172.16.10.176:5000/api';
+const API_BASE = 'http://172.16.13.165:5000/api';
 const COLOR_PALETTE = ['bg-blue-600', 'bg-red-600', 'bg-green-600', 'bg-amber-500', 'bg-purple-600', 'bg-pink-600', 'bg-teal-600'];
 
 const TIME_SLOTS = [];

@@ -1,6 +1,6 @@
 import { Edit2, Trash2, Image as ImageIcon, FileText } from 'lucide-react'
 
-const FILE_BASE = 'http://172.16.10.176:5000'
+const FILE_BASE = 'http://172.16.13.165:5000'
 
 export default function BarangTable({ data, selected, onToggleSelect, onEdit, onDelete, onDetail, allSelected, onToggleSelectAll }) {
   const formatTanggal = (dateStr) => {

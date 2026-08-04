@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { X, ChevronDown, Check, Upload, Image as ImageIcon, FileText, Trash2 } from 'lucide-react'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS, KONDISI_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.16.10.176:5000/api'
+const API_BASE = 'http://172.16.13.165:5000/api'
 
 export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({
