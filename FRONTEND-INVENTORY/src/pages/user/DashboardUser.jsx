@@ -3,7 +3,7 @@ import SidebarUser from '../../components/common/SidebarUser';
 import StatCard from '../../components/dashboard/StatCard.jsx';
 import ProgressListCard from '../../components/dashboard/ProgressListCard.jsx';
 
-const API_BASE = 'http://172.16.13.165:5000/api';
+const API_BASE = 'http://192.168.1.88:5000/api';
 
 export default function DashboardUser() {
   const [stats, setStats] = useState([]);

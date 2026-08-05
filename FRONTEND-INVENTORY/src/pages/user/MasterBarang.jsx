@@ -8,8 +8,8 @@ import {
 } from 'lucide-react';
 import SidebarUser from '../../components/common/SidebarUser';
 
-const API_BASE = 'http://172.16.13.165:5000/api';
-const SERVER_BASE = 'http://172.16.13.165:5000';
+const API_BASE = 'http://192.168.1.88:5000/api';
+const SERVER_BASE = 'http://192.168.1.88:5000';
 
 export default function MasterBarangUser() {
   const [searchTerm, setSearchTerm] = useState('');

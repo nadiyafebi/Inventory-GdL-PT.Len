@@ -50,6 +50,9 @@ router.get('/', verifyToken, async (req, res) => {
     const [[{ approvalRuang }]] = await pool.query(
       `SELECT COUNT(*) as approvalRuang FROM booking_ruangan WHERE status = 'Menunggu'`
     );
+    const [[{ approvalPengembalian }]] = await pool.query(
+      `SELECT COUNT(*) as approvalPengembalian FROM peminjaman WHERE status = 'Menunggu Verifikasi'`
+    );
 
     const [pinjamRows] = await pool.query(
       `SELECT p.id, b.nama_barang, u.nama as peminjam, u.divisi, p.tanggal_pinjam
@@ -66,6 +69,14 @@ router.get('/', verifyToken, async (req, res) => {
       JOIN users u ON br.user_id = u.id
       WHERE br.status = 'Menunggu'
       ORDER BY br.diajukan_pada DESC`
+    );
+    const [kembaliRows] = await pool.query(
+      `SELECT p.id, b.nama_barang, u.nama as peminjam, u.divisi, p.tanggal_kembali_aktual
+      FROM peminjaman p
+      JOIN barang b ON p.barang_id = b.id
+      JOIN users u ON p.user_id = u.id
+      WHERE p.status = 'Menunggu Verifikasi'
+      ORDER BY p.tanggal_kembali_aktual DESC`
     );
 
     const menungguApproval = [
@@ -84,6 +95,14 @@ router.get('/', verifyToken, async (req, res) => {
         peminjam: r.peminjam,
         divisi: r.divisi,
         tanggal: r.tanggal
+      })),
+      ...kembaliRows.map(r => ({
+        id: r.id,
+        jenis: 'pengembalian',
+        nama: r.nama_barang,
+        peminjam: r.peminjam,
+        divisi: r.divisi,
+        tanggal: r.tanggal_kembali_aktual
       }))
     ];
 
@@ -95,6 +114,7 @@ router.get('/', verifyToken, async (req, res) => {
         programAktif,
         approvalPinjam,
         approvalRuang,
+        approvalPengembalian,
         barangRusak,
         barangPerProgram: perProgram,
         barangPerStatus: perStatus,

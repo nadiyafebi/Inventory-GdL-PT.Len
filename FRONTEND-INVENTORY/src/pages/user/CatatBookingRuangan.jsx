@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { ChevronDown, Check } from 'lucide-react';
 
-const API_BASE = 'http://172.16.13.165:5000/api';
+const API_BASE = 'http://192.168.1.88:5000/api';
 
 export default function CatatBookingRuangan() {
   const [formData, setFormData] = useState({

@@ -1,6 +1,6 @@
 import React from 'react';
 
-const FILE_BASE = 'http://172.16.13.165:5000';
+const FILE_BASE = 'http://192.168.1.88:5000';
 
 function formatTanggal(dateStr) {
   if (!dateStr) return '-';

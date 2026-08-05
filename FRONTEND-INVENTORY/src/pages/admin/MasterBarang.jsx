@@ -9,7 +9,7 @@ import ImportBarangModal from '../../components/barang/ImportBarangModal.jsx'
 import DetailBarangModal from '../../components/barang/DetailBarangModal.jsx'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.16.13.165:5000/api'
+const API_BASE = 'http://192.168.1.88:5000/api'
 
 export default function MasterBarang() {
   const [barang, setBarang] = useState([])

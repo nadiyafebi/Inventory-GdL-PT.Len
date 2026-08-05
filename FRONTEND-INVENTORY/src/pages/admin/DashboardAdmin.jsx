@@ -24,7 +24,7 @@ export default function DashboardAdmin() {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    fetch('http://172.16.13.165:5000/api/dashboard', {
+    fetch('http://192.168.1.88:5000/api/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -105,6 +105,12 @@ export default function DashboardAdmin() {
       return;
     }
 
+    if (item.jenis === 'pengembalian') {
+      sessionStorage.setItem('bukaDetailTransaksi', JSON.stringify({ id: item.id, tipe: 'pengembalian' }));
+      navigate('/admin/peminjaman-pengembalian');
+      return;
+    }
+
     // Item barang
     const mappedItem = {
       id: item.id,
@@ -142,7 +148,7 @@ export default function DashboardAdmin() {
 
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://172.16.13.165:5000/api/peminjaman/${rejectTarget.id}/persetujuan`, {
+      const res = await fetch(`http://192.168.1.88:5000/api/peminjaman/${rejectTarget.id}/persetujuan`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ disetujui: false })

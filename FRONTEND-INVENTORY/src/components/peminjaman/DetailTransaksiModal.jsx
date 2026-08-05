@@ -2,7 +2,7 @@ import React from 'react';
 import { ImageIcon, X, CheckCircle2 } from 'lucide-react';
 
 const badgeBase = 'px-2.5 py-1 rounded-md text-xs font-semibold';
-const SERVER_BASE = 'http://172.16.13.165:5000';
+const SERVER_BASE = 'http://192.168.1.88:5000';
 
 function formatTanggalJam(isoString) {
   if (!isoString) return '-';
@@ -170,19 +170,21 @@ export default function DetailTransaksiModal({ isOpen, onClose, transaksi, onApp
                 >
                   Tutup
                 </button>
-                <button
-                  onClick={() => onReject?.(transaksi)}
-                  className="px-5 py-2 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200"
-                >
-                  Tolak
-                </button>
+                {isPeminjaman && (
+                  <button
+                    onClick={() => onReject?.(transaksi)}
+                    className="px-5 py-2 rounded-xl text-xs font-semibold bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  >
+                    Tolak
+                  </button>
+                )}
                 <button
                   onClick={() =>
                     isPeminjaman ? onApprove?.(transaksi) : onVerifikasi?.(transaksi)
                   }
                   className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#005CA9] text-white hover:bg-[#004B8A]"
                 >
-                  Setujui
+                  {isPeminjaman ? 'Setujui' : 'Verifikasi'}
                 </button>
               </>
             )}
