@@ -26,24 +26,25 @@ router.get('/', verifyToken, async (req, res) => {
 
     // Barang per program (termasuk yang belum diisi)
     const [perProgramRaw] = await pool.query(
-    `SELECT COALESCE(NULLIF(program_project, ''), 'Belum Diisi') as program, COUNT(*) as jumlah 
-    FROM barang 
-    GROUP BY program 
-    ORDER BY jumlah DESC`
+      `SELECT COALESCE(NULLIF(program_project, ''), 'Belum Diisi') as program, COUNT(*) as jumlah 
+      FROM barang 
+      GROUP BY program 
+      ORDER BY jumlah DESC`
     );
     const perProgram = perProgramRaw;
 
     // Barang per status (pastikan semua kategori muncul, termasuk yang belum diisi "-")
     const [statusRows] = await pool.query(
-    `SELECT status, COUNT(*) as jumlah FROM barang GROUP BY status`
+      `SELECT status, COUNT(*) as jumlah FROM barang GROUP BY status`
     );
     const statusMap = {};
     statusRows.forEach(row => { statusMap[row.status] = row.jumlah; });
     const perStatus = VALID_STATUS.map(status => ({
-    status: status === '-' ? 'Belum Diisi' : status,
-    jumlah: statusMap[status] || 0
+      status: status === '-' ? 'Belum Diisi' : status,
+      jumlah: statusMap[status] || 0
     }));
 
+    // Hitungan statistik untuk Card atas
     const [[{ approvalPinjam }]] = await pool.query(
       `SELECT COUNT(*) as approvalPinjam FROM peminjaman WHERE status = 'Menunggu Persetujuan'`
     );
@@ -53,58 +54,6 @@ router.get('/', verifyToken, async (req, res) => {
     const [[{ approvalPengembalian }]] = await pool.query(
       `SELECT COUNT(*) as approvalPengembalian FROM peminjaman WHERE status = 'Menunggu Verifikasi'`
     );
-
-    const [pinjamRows] = await pool.query(
-      `SELECT p.id, b.nama_barang, u.nama as peminjam, u.divisi, p.tanggal_pinjam
-      FROM peminjaman p
-      JOIN barang b ON p.barang_id = b.id
-      JOIN users u ON p.user_id = u.id
-      WHERE p.status = 'Menunggu Persetujuan'
-      ORDER BY p.dibuat_pada DESC`
-    );
-    const [ruangRows] = await pool.query(
-      `SELECT br.id, r.nama_ruangan, u.nama as peminjam, u.divisi, br.tanggal
-      FROM booking_ruangan br
-      JOIN ruangan r ON br.ruangan_id = r.id
-      JOIN users u ON br.user_id = u.id
-      WHERE br.status = 'Menunggu'
-      ORDER BY br.diajukan_pada DESC`
-    );
-    const [kembaliRows] = await pool.query(
-      `SELECT p.id, b.nama_barang, u.nama as peminjam, u.divisi, p.tanggal_kembali_aktual
-      FROM peminjaman p
-      JOIN barang b ON p.barang_id = b.id
-      JOIN users u ON p.user_id = u.id
-      WHERE p.status = 'Menunggu Verifikasi'
-      ORDER BY p.tanggal_kembali_aktual DESC`
-    );
-
-    const menungguApproval = [
-      ...pinjamRows.map(r => ({
-        id: r.id,
-        jenis: 'peminjaman',
-        nama: r.nama_barang,
-        peminjam: r.peminjam,
-        divisi: r.divisi,
-        tanggal: r.tanggal_pinjam
-      })),
-      ...ruangRows.map(r => ({
-        id: r.id,
-        jenis: 'booking',
-        nama: r.nama_ruangan,
-        peminjam: r.peminjam,
-        divisi: r.divisi,
-        tanggal: r.tanggal
-      })),
-      ...kembaliRows.map(r => ({
-        id: r.id,
-        jenis: 'pengembalian',
-        nama: r.nama_barang,
-        peminjam: r.peminjam,
-        divisi: r.divisi,
-        tanggal: r.tanggal_kembali_aktual
-      }))
-    ];
 
     res.json({
       success: true,
@@ -117,8 +66,7 @@ router.get('/', verifyToken, async (req, res) => {
         approvalPengembalian,
         barangRusak,
         barangPerProgram: perProgram,
-        barangPerStatus: perStatus,
-        menungguApproval
+        barangPerStatus: perStatus
       },
       message: ''
     });
