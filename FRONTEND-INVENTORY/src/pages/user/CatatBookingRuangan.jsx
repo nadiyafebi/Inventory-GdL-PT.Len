@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { ChevronDown, Check } from 'lucide-react';
 
-const API_BASE = 'http://192.168.1.88:5000/api';
+const API_BASE = 'http://172.16.10.148:5000/api';
 
 export default function CatatBookingRuangan() {
   const [formData, setFormData] = useState({
@@ -252,7 +252,7 @@ export default function CatatBookingRuangan() {
                 />
               </div>
               <div>
-                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Keperluan</label>
+                <label className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-1">Agenda Rapat</label>
                 <input
                   type="text"
                   placeholder="Contoh: Rapat Progress NVG"
@@ -302,7 +302,7 @@ export default function CatatBookingRuangan() {
                     <th className="p-3">Tanggal Peminjaman</th>
                     <th className="p-3">Jam Mulai</th>
                     <th className="p-3">Jam Selesai</th>
-                    <th className="p-3">Keperluan</th>
+                    <th className="p-3">Agenda Rapat</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100 text-gray-700 font-medium">

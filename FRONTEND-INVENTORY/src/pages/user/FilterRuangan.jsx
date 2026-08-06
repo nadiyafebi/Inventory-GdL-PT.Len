@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
-const API_BASE = 'http://192.168.1.88:5000/api';
+const API_BASE = 'http://172.16.10.148:5000/api';
 const COLOR_PALETTE = ['bg-blue-600', 'bg-red-600', 'bg-green-600', 'bg-amber-500', 'bg-purple-600', 'bg-pink-600', 'bg-teal-600'];
 
 const TIME_SLOTS = [];
@@ -484,7 +484,7 @@ export default function FilterRuangan() {
               </div>
               {selectedBooking.keperluan && (
                 <div className="flex flex-col gap-1 pt-1 border-t border-gray-200">
-                  <span className="text-gray-400 font-medium">Keperluan</span>
+                  <span className="text-gray-400 font-medium">Agenda Rapat</span>
                   <span className="font-semibold text-gray-800 text-left leading-relaxed">{selectedBooking.keperluan}</span>
                 </div>
               )}

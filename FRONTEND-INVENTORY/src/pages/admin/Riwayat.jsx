@@ -3,8 +3,8 @@ import { Search, Download, Image as ImageIcon, X } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar.jsx';
 import EksporRiwayatModal from '../../components/riwayat/EksporRiwayatModal.jsx';
 
-const API_BASE = 'http://192.168.1.88:5000/api';
-const FILE_BASE = 'http://192.168.1.88:5000';
+const API_BASE = 'http://172.16.10.148:5000/api';
+const FILE_BASE = 'http://172.16.10.148:5000';
 
 const AKTIVITAS_OPTIONS = [
   'Pengajuan Peminjaman', 'Peminjaman Disetujui', 'Peminjaman Ditolak',

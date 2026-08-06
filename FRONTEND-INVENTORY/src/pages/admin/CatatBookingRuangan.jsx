@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '../../components/common/Sidebar.jsx';
 
-const API_BASE = 'http://192.168.1.88:5000/api';
+const API_BASE = 'http://172.16.10.148:5000/api';
 
 export default function CatatBookingRuangan() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -233,7 +233,7 @@ export default function CatatBookingRuangan() {
                   <th className="p-3 sm:p-4 hidden md:table-cell">Unit</th>
                   <th className="p-3 sm:p-4 hidden lg:table-cell">Tanggal</th>
                   <th className="p-3 sm:p-4">Jam</th>
-                  <th className="p-3 sm:p-4 hidden xl:table-cell">Keperluan</th>
+                  <th className="p-3 sm:p-4 hidden xl:table-cell">Agenda Rapat</th>
                   <th className="p-3 sm:p-4">Persetujuan</th>
                   <th className="p-3 sm:p-4 text-center">Aksi</th>
                 </tr>
@@ -348,7 +348,7 @@ export default function CatatBookingRuangan() {
               </div>
               {selectedBooking.keperluan && (
                 <div className="flex justify-between gap-4">
-                  <span className="text-gray-400 flex-shrink-0">Keperluan</span>
+                  <span className="text-gray-400 flex-shrink-0">Agenda Rapat</span>
                   <span className="font-semibold text-gray-700 text-right">
                     {selectedBooking.keperluan}
                   </span>

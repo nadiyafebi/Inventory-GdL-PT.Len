@@ -2,7 +2,7 @@ import React from 'react';
 import { ImageIcon, X, CheckCircle2 } from 'lucide-react';
 
 const badgeBase = 'px-2.5 py-1 rounded-md text-xs font-semibold';
-const SERVER_BASE = 'http://192.168.1.88:5000';
+const SERVER_BASE = 'http://172.16.10.148:5000';
 
 function formatTanggalJam(isoString) {
   if (!isoString) return '-';
