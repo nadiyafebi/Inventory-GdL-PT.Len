@@ -57,7 +57,7 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// ===== AJUKAN peminjaman baru =====
+// ===== AJUKAN peminjaman baru (LANGSUNG OTOMATIS DISETUJUI, tanpa approval admin) =====
 router.post('/', verifyToken, uploadFotoPeminjaman.single('fotoSebelum'), async (req, res) => {
   try {
     const { barangId, tanggalPinjam, tanggalRencanaKembali, keperluan } = req.body;
@@ -82,20 +82,31 @@ router.post('/', verifyToken, uploadFotoPeminjaman.single('fotoSebelum'), async 
       return res.status(409).json({ success: false, data: null, message: 'Barang ini sedang dipinjam atau masih dalam proses peminjaman lain' });
     }
 
+    // Langsung status 'Dipinjam' + tercatat disetujui saat itu juga (tanpa approval manual admin)
     const [result] = await pool.query(
-      `INSERT INTO peminjaman (barang_id, user_id, tanggal_pinjam, tanggal_rencana_kembali, keperluan, kondisi_awal, foto_sebelum)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO peminjaman (barang_id, user_id, tanggal_pinjam, tanggal_rencana_kembali, keperluan, kondisi_awal, foto_sebelum, status, disetujui_pada)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'Dipinjam', NOW())`,
       [barangId, userId, tanggalPinjam, tanggalRencanaKembali || null, keperluan || null, barang.kondisi, fotoSebelum]
     );
 
-    res.json({ success: true, data: { id: result.insertId }, message: 'Peminjaman berhasil diajukan, menunggu persetujuan' });
+    // Barang langsung berstatus Dipinjam
+    await pool.query(`UPDATE barang SET status='Dipinjam' WHERE id=?`, [barangId]);
+
+    // Catat log transaksi langsung
+    await pool.query(
+      `INSERT INTO log_transaksi (barang_id, penanggung_jawab, aktivitas, tanggal, remark)
+       SELECT ?, u.nama, 'Dipinjam', NOW(), ? FROM users u WHERE u.id=?`,
+      [barangId, keperluan || null, userId]
+    );
+
+    res.json({ success: true, data: { id: result.insertId }, message: 'Peminjaman berhasil, barang langsung dipinjamkan' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Server error' });
   }
 });
 
-// ===== APPROVE / TOLAK peminjaman (admin only) =====
+// ===== APPROVE / TOLAK peminjaman (admin only) - tetap ada untuk data lama yang masih Menunggu Persetujuan =====
 router.put('/:id/persetujuan', verifyToken, requireAdmin, async (req, res) => {
   const conn = await pool.getConnection();
   try {
@@ -353,7 +364,7 @@ router.get('/menunggu-saya', verifyToken, async (req, res) => {
 router.get('/milik-saya', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     // Ambil SEMUA field yang dibutuhkan dari tabel barang dan users
     const [rows] = await pool.query(
       `SELECT 
@@ -384,17 +395,16 @@ router.get('/milik-saya', verifyToken, async (req, res) => {
     const data = rows.map(r => {
       let sisaHari = null;
       let terlambat = false;
-      
+
       if (r.tanggal_rencana_kembali) {
         const today = new Date();
         const target = new Date(r.tanggal_rencana_kembali);
         sisaHari = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
         terlambat = sisaHari < 0;
       }
-      
+
       return {
         id: r.id,
-        // Data dari tabel peminjaman
         tanggalPinjam: r.tanggal_pinjam,
         tanggalRencanaKembali: r.tanggal_rencana_kembali,
         tanggalKembaliAktual: r.tanggal_kembali_aktual,
@@ -402,7 +412,6 @@ router.get('/milik-saya', verifyToken, async (req, res) => {
         kondisiAwal: r.kondisi_awal,
         fotoSebelum: r.foto_sebelum,
         status: r.status,
-        // Data dari tabel barang
         namaBarang: r.nama_barang,
         merk: r.merk,
         tipe: r.tipe,
@@ -414,10 +423,8 @@ router.get('/milik-saya', verifyToken, async (req, res) => {
         lokasi: r.lokasi,
         programProject: r.program_project,
         kondisiBarang: r.kondisi_barang,
-        // Data dari tabel users
         peminjam: r.peminjam,
         unit: r.unit,
-        // Hitungan
         sisaHari,
         terlambat
       };

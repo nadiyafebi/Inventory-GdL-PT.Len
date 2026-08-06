@@ -64,7 +64,7 @@ router.get('/booking/list', verifyToken, async (req, res) => {
   }
 });
 
-// ===== AJUKAN booking baru (user atau admin) - dengan cek bentrok otomatis =====
+// ===== AJUKAN booking baru (LANGSUNG OTOMATIS DISETUJUI, tanpa approval admin) - dengan cek bentrok otomatis =====
 router.post('/booking', verifyToken, async (req, res) => {
   try {
     const { ruanganId, tanggal, jamMulai, jamSelesai, keperluan } = req.body;
@@ -100,20 +100,21 @@ router.post('/booking', verifyToken, async (req, res) => {
       });
     }
 
+    // Langsung berstatus Disetujui, tanpa perlu klik approve admin
     const [result] = await pool.query(
-      `INSERT INTO booking_ruangan (ruangan_id, user_id, tanggal, jam_mulai, jam_selesai, keperluan)
-       VALUES (?, ?, ?, ?, ?, ?)`,
+      `INSERT INTO booking_ruangan (ruangan_id, user_id, tanggal, jam_mulai, jam_selesai, keperluan, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'Disetujui')`,
       [ruanganId, userId, tanggal, jamMulai, jamSelesai, keperluan]
     );
 
-    res.json({ success: true, data: { id: result.insertId }, message: 'Booking berhasil diajukan, menunggu approval' });
+    res.json({ success: true, data: { id: result.insertId }, message: 'Booking ruangan berhasil, jadwal langsung terkonfirmasi' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Server error' });
   }
 });
 
-// ===== APPROVE / TOLAK booking (admin only) =====
+// ===== APPROVE / TOLAK booking (admin only) - tetap ada untuk data lama yang masih Menunggu =====
 router.put('/booking/:id/status', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
