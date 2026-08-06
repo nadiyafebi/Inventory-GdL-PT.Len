@@ -4,7 +4,7 @@ import Sidebar from '../../components/common/Sidebar.jsx';
 import TransaksiTable from '../../components/peminjaman/TransaksiTable.jsx';
 import DetailTransaksiModal from '../../components/peminjaman/DetailTransaksiModal.jsx';
 
-const API_BASE = 'http://172.16.10.148:5000/api';
+const API_BASE = 'http://172.16.13.65:5000/api';
 
 const STATUS_OPTIONS = [
   'Menunggu Approval', 'Dipinjam', 'Ditolak', 'Cek Kembali', 'Selesai', 'Terlambat'
@@ -162,7 +162,7 @@ export default function CatatPeminjamanPengembalian() {
 
       <div className={`
         flex-1 w-full transition-all duration-300 ease-in-out
-        md:ml-[288px] md:w-[calc(100%-320px)]
+        md:ml-[320px] md:w-[calc(100%-320px)]
         px-4 sm:px-6 md:px-8 
         py-4 sm:py-6 md:py-8
         flex flex-col gap-4 md:gap-5
