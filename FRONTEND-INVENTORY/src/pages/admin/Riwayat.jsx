@@ -3,8 +3,8 @@ import { Search, Download, Image as ImageIcon, X } from 'lucide-react';
 import Sidebar from '../../components/common/Sidebar.jsx';
 import EksporRiwayatModal from '../../components/riwayat/EksporRiwayatModal.jsx';
 
-const API_BASE = 'http://172.16.13.82:5000/api';
-const FILE_BASE = 'http://172.16.13.82:5000';
+const API_BASE = 'http://172.16.13.53:5000/api';
+const FILE_BASE = 'http://172.16.13.53:5000';
 
 const AKTIVITAS_OPTIONS = [
   'Pengajuan Peminjaman', 'Peminjaman Disetujui', 'Peminjaman Ditolak',
@@ -46,11 +46,8 @@ export default function Riwayat() {
     fetchRiwayat();
   }, []);
 
-  // Di dalam komponen Riwayat, update fungsi handleExportSubmit
-
   const handleExportSubmit = async ({ format, fields }) => {
     try {
-      // Map field names
       const fieldMapping = {
         waktu: 'waktu',
         aktivitas: 'aktivitas',
@@ -64,14 +61,12 @@ export default function Riwayat() {
 
       const mappedFields = fields.map(f => fieldMapping[f] || f);
 
-      // Ambil token
       const token = localStorage.getItem('token');
       if (!token) {
         alert('Session expired. Silakan login kembali.');
         return false;
       }
 
-      // Siapkan data untuk dikirim
       const exportData = {
         format: format === 'xlsx' ? 'excel' : 'csv',
         columns: mappedFields,
@@ -84,9 +79,8 @@ export default function Riwayat() {
 
       console.log('Sending export data:', exportData);
 
-      // Kirim request dengan timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       const res = await fetch(`${API_BASE}/riwayat/export`, {
         method: 'POST',
@@ -108,18 +102,15 @@ export default function Riwayat() {
             errorMessage = errorData.message;
           }
         } catch (e) {
-          // If response is not JSON
           console.error('Error parsing error response:', e);
         }
         alert(errorMessage);
         return false;
       }
 
-      // Cek apakah response adalah blob
       const contentType = res.headers.get('content-type');
-      if (!contentType || !contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') && 
+      if (!contentType || !contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') &&
           !contentType.includes('text/csv')) {
-        // Mungkin response adalah JSON error
         try {
           const errorData = await res.json();
           alert(errorData.message || 'Terjadi kesalahan');
@@ -131,8 +122,7 @@ export default function Riwayat() {
       }
 
       const blob = await res.blob();
-      
-      // Validasi blob
+
       if (blob.size === 0) {
         alert('File yang diekspor kosong');
         return false;
@@ -147,11 +137,11 @@ export default function Riwayat() {
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
-      
+
       return true;
     } catch (error) {
       console.error('Export error:', error);
-      
+
       if (error.name === 'AbortError') {
         alert('Request timeout. Silakan coba lagi.');
       } else if (error.message === 'Failed to fetch') {
@@ -365,17 +355,21 @@ export default function Riwayat() {
       {/* Modal Detail */}
       {detailItem && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto flex flex-col">
-            <div className="p-6 pb-4 border-b border-gray-100 flex justify-between items-start">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col">
+
+            {/* Header */}
+            <div className="px-6 pt-6 pb-3 flex justify-between items-start">
               <div>
                 <p className="text-[10px] uppercase font-bold tracking-wider text-gray-400 mb-1">Detail Riwayat</p>
-                <h2 className="text-lg font-bold text-gray-900">{detailItem.aktivitas}</h2>
+                <h2 className="text-[15px] font-bold text-gray-900">{detailItem.aktivitas}</h2>
               </div>
-              <button onClick={() => setDetailItem(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer">
-                <X size={20} />
+              <button onClick={() => setDetailItem(null)} className="text-gray-400 hover:text-gray-600 cursor-pointer mt-0.5">
+                <X size={18} />
               </button>
             </div>
-            <div className="p-6 flex flex-col gap-3 text-xs">
+
+            {/* Body */}
+            <div className="px-6 pb-5 overflow-y-auto flex flex-col gap-2 text-[13px]">
               <DetailRow label="Waktu" value={formatWaktu(detailItem.waktu)} />
               <DetailRow label="Jenis" value={detailItem.jenis} />
               <DetailRow label={detailItem.jenis === 'Ruangan' ? 'Nama Ruangan' : 'Nama Barang'} value={detailItem.nama} />
@@ -385,17 +379,36 @@ export default function Riwayat() {
               <DetailRow label="Divisi" value={detailItem.divisi} />
               <DetailRow label="Rentang Waktu" value={formatRentang(detailItem)} />
               {detailItem.kondisi && <DetailRow label="Kondisi" value={detailItem.kondisi} />}
-              {detailItem.catatan && <DetailRow label="Catatan / Keperluan" value={detailItem.catatan} />}
-              {detailItem.foto && (
-                <div className="pt-2">
-                  <span className="text-gray-400 font-medium block mb-2">Foto</span>
-                  <img src={`${FILE_BASE}${detailItem.foto}`} alt="foto" className="w-full max-h-64 object-cover rounded-2xl border border-gray-200" />
+              {detailItem.catatan && <DetailRow label="Catatan/Keperluan" value={detailItem.catatan} />}
+
+              {/* Foto */}
+              <div className="pt-2">
+                <span className="text-gray-500">Foto</span>
+                <div className="mt-2">
+                  {detailItem.foto ? (
+                    <a href={`${FILE_BASE}${detailItem.foto}`} target="_blank" rel="noreferrer"
+                      className="block w-full max-w-[260px] aspect-[4/3] bg-gray-50 border border-gray-200 rounded-xl overflow-hidden">
+                      <img src={`${FILE_BASE}${detailItem.foto}`} alt="foto" className="w-full h-full object-cover" />
+                    </a>
+                  ) : (
+                    <div className="w-full max-w-[260px] aspect-[4/3] bg-gray-50 border border-gray-200 rounded-xl flex items-center justify-center">
+                      <span className="text-[11px] text-gray-400 text-center px-2 leading-tight">Tidak ada foto</span>
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
-            <div className="p-4 border-t border-gray-100">
-              <button onClick={() => setDetailItem(null)} className="w-full py-3 bg-gray-100 text-gray-700 font-bold rounded-2xl hover:bg-gray-200 transition-colors cursor-pointer text-xs">Tutup</button>
+
+            {/* Footer */}
+            <div className="px-6 pb-6 pt-2 bg-white">
+              <button
+                onClick={() => setDetailItem(null)}
+                className="w-full py-3 bg-gray-200 text-gray-700 font-semibold rounded-full hover:bg-gray-300 transition-colors cursor-pointer text-[13px]"
+              >
+                Tutup
+              </button>
             </div>
+
           </div>
         </div>
       )}
@@ -406,10 +419,13 @@ export default function Riwayat() {
 }
 
 function DetailRow({ label, value }) {
+  const isEmpty = value === null || value === undefined || value === '' || value === '-';
   return (
-    <div className="flex justify-between items-start py-1.5 border-b border-gray-50 gap-4">
-      <span className="text-gray-400 font-medium shrink-0">{label}</span>
-      <span className="text-gray-800 font-semibold text-right">{value || '-'}</span>
+    <div className="grid grid-cols-[130px_1fr] gap-4">
+      <span className="text-gray-500 shrink-0">{label}</span>
+      <span className="text-gray-900 font-medium text-left">
+        {isEmpty ? '-' : value}
+      </span>
     </div>
   );
 }
