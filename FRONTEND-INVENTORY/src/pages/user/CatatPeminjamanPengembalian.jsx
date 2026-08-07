@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import SidebarUser from '../../components/common/SidebarUser';
 import { Camera, Check, ChevronDown, ArrowLeft, Search } from 'lucide-react';
 
-const API_BASE = 'http://172.16.10.148:5000/api';
+const API_BASE = 'http://172.16.13.82:5000/api';
+
+// PENTING: daftar ini harus sama persis dengan STATUS_TERSEDIA di peminjamanRoutes.js backend
+const STATUS_TERSEDIA_FRONTEND = ['Disimpan', 'Didaftarkan', 'Dikembalikan'];
 
 export default function CatatPeminjamanPengembalianUser() {
   const token = localStorage.getItem('token');
@@ -34,10 +37,11 @@ export default function CatatPeminjamanPengembalianUser() {
   });
 
   const [barangDipinjamList, setBarangDipinjamList] = useState([]);
-  
+
   // Modal States
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [showReturnSuccessModal, setShowReturnSuccessModal] = useState(false);
+  const [returnSuccessMessage, setReturnSuccessMessage] = useState('');
 
   const [isReturnMode, setIsReturnMode] = useState(false);
   const [returnItemData, setReturnItemData] = useState(null);
@@ -57,12 +61,12 @@ export default function CatatPeminjamanPengembalianUser() {
 
   const KONDISI_OPTIONS = ['Baru', 'Baik', 'Rusak Ringan', 'Rusak Berat', 'Siap Pakai'];
   const STATUS_BARANG_OPTIONS = [
-    'Dibeli', 'Dikirim', 'Dipasang', 'Didaftarkan', 'Disimpan', 
-    'Dipakai', 'Dipinjam', 'Dikembalikan', 'Diperbaiki', 'Rusak', 
+    'Dibeli', 'Dikirim', 'Dipasang', 'Didaftarkan', 'Disimpan',
+    'Dipakai', 'Dipinjam', 'Dikembalikan', 'Diperbaiki', 'Rusak',
     'Hilang', 'Dibuang', 'Dijual', 'Dibersihkan'
   ];
 
-  // ===== Fetch daftar barang (untuk dropdown Nama Barang) =====
+  // ===== Fetch daftar barang (untuk dropdown Nama Barang) - hanya yang berstatus tersedia =====
   const fetchBarang = () => {
     fetch(`${API_BASE}/barang`, {
       headers: { Authorization: `Bearer ${token}` }
@@ -72,7 +76,7 @@ export default function CatatPeminjamanPengembalianUser() {
         if (contentType && contentType.includes('application/json')) {
           const result = await res.json();
           if (result.success && Array.isArray(result.data)) {
-            const tersedia = result.data.filter(b => b.status !== 'Dipinjam');
+            const tersedia = result.data.filter(b => STATUS_TERSEDIA_FRONTEND.includes(b.status));
             setBarangList(tersedia);
           } else {
             setBarangList([]);
@@ -253,6 +257,7 @@ export default function CatatPeminjamanPengembalianUser() {
       if (contentType && contentType.includes('application/json')) {
         const result = await res.json();
         if (result.success) {
+          setReturnSuccessMessage(result.message || 'Pengembalian berhasil diproses.');
           setShowReturnSuccessModal(true);
           setIsReturnMode(false);
           fetchPeminjaman();
@@ -300,7 +305,7 @@ export default function CatatPeminjamanPengembalianUser() {
 
   return (
     <div className="flex bg-white font-sans overflow-x-hidden min-h-screen select-none">
-      
+
       {/* SIDEBAR USER */}
       <SidebarUser />
 
@@ -370,7 +375,7 @@ export default function CatatPeminjamanPengembalianUser() {
                                   {b.namaBarang || b.nama_barang || 'Nama tidak tersedia'}
                                 </p>
                                 <p className="text-[10px] text-gray-400">
-                                  {b.kodeBarang || b.kode_barang || 'No code'} • 
+                                  {b.kodeBarang || b.kode_barang || 'No code'} •
                                   {b.merk || 'No merk'} {b.tipe || ''}
                                   {b.serialNumber && ` • SN: ${b.serialNumber}`}
                                 </p>
@@ -590,7 +595,7 @@ export default function CatatPeminjamanPengembalianUser() {
                         barangDipinjamList.map((item, idx) => {
                           const sisaHari = getSisaHari(item.tanggalRencanaKembali);
                           const statusInfo = getStatusInfo(item.status, sisaHari);
-                          
+
                           return (
                             <tr key={item.id || idx} className="hover:bg-gray-50/50 transition-colors">
                               <td className="p-3 text-gray-600 whitespace-nowrap">{item.tanggalPinjam || '-'}</td>
@@ -727,10 +732,10 @@ export default function CatatPeminjamanPengembalianUser() {
                 <div className="col-span-2">
                   <span className="text-[10px] font-bold text-gray-400 uppercase">Sisa Waktu</span>
                   <p className="font-bold text-yellow-600 mt-0.5">
-                    {getSisaHari(returnItemData?.tanggalRencanaKembali) !== null 
-                      ? (getSisaHari(returnItemData?.tanggalRencanaKembali) < 0 
-                          ? `${Math.abs(getSisaHari(returnItemData?.tanggalRencanaKembali))} hari terlambat` 
-                          : `${getSisaHari(returnItemData?.tanggalRencanaKembali)} Hari lagi`) 
+                    {getSisaHari(returnItemData?.tanggalRencanaKembali) !== null
+                      ? (getSisaHari(returnItemData?.tanggalRencanaKembali) < 0
+                          ? `${Math.abs(getSisaHari(returnItemData?.tanggalRencanaKembali))} hari terlambat`
+                          : `${getSisaHari(returnItemData?.tanggalRencanaKembali)} Hari lagi`)
                       : '-'}
                   </p>
                 </div>
@@ -858,12 +863,12 @@ export default function CatatPeminjamanPengembalianUser() {
                           formReturnData.fotoSesudah ? 'border-emerald-500 bg-emerald-50 text-emerald-600' : 'border-gray-300 text-gray-500 hover:bg-gray-50'
                         }`}>
                           <Camera size={24} />
-                          <input 
-                            type="file" 
-                            accept="image/*" 
-                            capture="environment" 
-                            className="hidden" 
-                            onChange={(e) => setFormReturnData({ ...formReturnData, fotoSesudah: e.target.files[0] })} 
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            onChange={(e) => setFormReturnData({ ...formReturnData, fotoSesudah: e.target.files[0] })}
                           />
                         </label>
                         {formReturnData.fotoSesudah && (
@@ -904,7 +909,7 @@ export default function CatatPeminjamanPengembalianUser() {
             </div>
             <h3 className="text-xl font-extrabold text-gray-900 mb-2">Peminjaman Berhasil Diajukan!</h3>
             <p className="text-xs text-gray-500 font-medium mb-8 leading-relaxed max-w-xs">
-              Pengajuan peminjaman menunggu persetujuan admin.
+              Barang berhasil dipinjam.
             </p>
             <button
               type="button"
@@ -924,9 +929,9 @@ export default function CatatPeminjamanPengembalianUser() {
             <div className="w-16 h-16 bg-[#DCFCE7] text-[#22C55E] rounded-full flex items-center justify-center mb-5">
               <Check size={32} strokeWidth={3} />
             </div>
-            <h3 className="text-xl font-extrabold text-gray-900 mb-2">Pengembalian Berhasil Diajukan!</h3>
+            <h3 className="text-xl font-extrabold text-gray-900 mb-2">Pengembalian Berhasil!</h3>
             <p className="text-xs text-gray-500 font-medium mb-8 leading-relaxed max-w-xs">
-              Pengajuan pengembalian menunggu verifikasi admin.
+              {returnSuccessMessage}
             </p>
             <button
               type="button"

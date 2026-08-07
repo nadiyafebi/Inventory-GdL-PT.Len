@@ -12,7 +12,7 @@ export default function DashboardAdmin() {
   useEffect(() => {
     const token = localStorage.getItem('token');
 
-    fetch('http://172.16.13.65:5000/api/dashboard', {
+    fetch('http://172.16.13.82:5000/api/dashboard', {
       headers: { Authorization: `Bearer ${token}` }
     })
       .then(res => res.json())
@@ -24,8 +24,6 @@ export default function DashboardAdmin() {
             { label: 'Total Barang', value: d.totalBarang || 0 },
             { label: 'Total Pengguna', value: d.totalUser || 0 },
             { label: 'Program Aktif', value: d.programAktif || 0 },
-            { label: 'Persetujuan Pinjam', value: d.approvalPinjam || 0 },
-            { label: 'Persetujuan Ruang', value: d.approvalRuang || 0 },
             { label: 'Barang Rusak', value: d.barangRusak || 0 },
           ]);
 
@@ -51,8 +49,6 @@ export default function DashboardAdmin() {
       { label: 'Total Barang', value: 120 },
       { label: 'Total User', value: 15 },
       { label: 'Program Aktif', value: 4 },
-      { label: 'Persetujuan Pinjam', value: 2 },
-      { label: 'Persetujuan Ruang', value: 1 },
       { label: 'Barang Rusak', value: 3 },
     ]);
     setProgramData([
@@ -82,7 +78,7 @@ export default function DashboardAdmin() {
         </h1>
 
         {/* Card Statistik Top Row */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           {stats.map((s) => (
             <StatCard key={s.label} {...s} />
           ))}

@@ -9,7 +9,7 @@ import ImportBarangModal from '../../components/barang/ImportBarangModal.jsx'
 import DetailBarangModal from '../../components/barang/DetailBarangModal.jsx'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.16.10.148:5000/api'
+const API_BASE = 'http://172.16.13.82:5000/api'
 
 export default function MasterBarang() {
   const [barang, setBarang] = useState([])
@@ -51,13 +51,15 @@ export default function MasterBarang() {
 
   useEffect(() => { fetchBarang() }, [])
 
-  const filtered = barang.filter((b) => {
-    const matchSearch = (b.nama || '').toLowerCase().includes(search.toLowerCase()) ||
-                        (b.serialNumber || '').toLowerCase().includes(search.toLowerCase())
-    const matchProgram = programFilter === 'Semua Program' || b.program === programFilter
-    const matchStatus = statusFilter === 'Semua Status' || b.status === statusFilter
-    return matchSearch && matchProgram && matchStatus
-  })
+  const filtered = barang
+    .filter((b) => {
+      const matchSearch = (b.nama || '').toLowerCase().includes(search.toLowerCase()) ||
+                          (b.serialNumber || '').toLowerCase().includes(search.toLowerCase())
+      const matchProgram = programFilter === 'Semua Program' || b.program === programFilter
+      const matchStatus = statusFilter === 'Semua Status' || b.status === statusFilter
+      return matchSearch && matchProgram && matchStatus
+    })
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
 
   const allSelected = filtered.length > 0 && filtered.every(b => selected.includes(b.id))
 
@@ -351,18 +353,16 @@ export default function MasterBarang() {
 
         {/* Table */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden w-full">
-          <div className="overflow-x-auto">
-            <BarangTable
-              data={filtered}
-              selected={selected}
-              onToggleSelect={(id) => setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])}
-              onEdit={(row) => setEditing(row)}
-              onDelete={handleDeleteClick}
-              onDetail={(row) => setDetailData(row)}
-              allSelected={allSelected}
-              onToggleSelectAll={handleToggleSelectAll}
-            />
-          </div>
+          <BarangTable
+            data={filtered}
+            selected={selected}
+            onToggleSelect={(id) => setSelected(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id])}
+            onEdit={(row) => setEditing(row)}
+            onDelete={handleDeleteClick}
+            onDetail={(row) => setDetailData(row)}
+            allSelected={allSelected}
+            onToggleSelectAll={handleToggleSelectAll}
+          />
         </div>
       </div>
 

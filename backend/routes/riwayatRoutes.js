@@ -8,7 +8,7 @@ const XLSX = require('xlsx');
 // ===== Ambil & bangun data riwayat gabungan (dipakai GET / dan POST /export) =====
 async function ambilRiwayat({ search, tanggalMulai, tanggalSelesai, aktivitas, jenis }) {
   const [pinjamRows] = await pool.query(
-    `SELECT p.id, p.status, p.dibuat_pada, p.disetujui_pada, p.tanggal_pinjam, p.tanggal_rencana_kembali,
+    `SELECT p.id, p.status, p.dibuat_pada, p.disetujui_pada, p.disetujui_oleh, p.tanggal_pinjam, p.tanggal_rencana_kembali,
             p.tanggal_kembali_aktual, p.diverifikasi_pada, p.keperluan, p.kondisi_awal,
             p.kondisi_saat_kembali, p.foto_sebelum, p.foto_sesudah, p.catatan_pengembalian,
             b.nama_barang, b.merk, b.tipe, b.kode_barang, b.serial_number,
@@ -53,7 +53,11 @@ async function ambilRiwayat({ search, tanggalMulai, tanggalSelesai, aktivitas, j
       });
     }
 
-    if (r.disetujui_pada) {
+    // Hanya tampilkan entry "Peminjaman Disetujui/Ditolak" kalau memang lewat approval
+    // manual admin (disetujui_oleh terisi). Peminjaman yang auto-approve saat dibuat
+    // (disetujui_oleh NULL) tidak perlu entry terpisah, supaya tidak duplikat dengan
+    // "Pengajuan Peminjaman" yang waktunya identik.
+    if (r.disetujui_pada && r.disetujui_oleh) {
       riwayat.push({
         id: `pinjam-approve-${r.id}`,
         waktu: r.disetujui_pada,

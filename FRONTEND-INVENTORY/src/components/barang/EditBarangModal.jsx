@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Image as ImageIcon, FileText, Trash2 } from 'lucide-react';
 import { PROGRAM_OPTIONS, STATUS_OPTIONS, KONDISI_OPTIONS } from '../../utils/constants.js';
 
-const API_BASE = 'http://172.16.10.148:5000/api';
+const API_BASE = 'http://172.16.13.82:5000/api';
 
 export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -308,7 +308,7 @@ export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit
               <div className="grid grid-cols-4 gap-2 mb-1">
                 {existingFoto.map((f) => (
                   <div key={`existing-${f.id}`} className="relative w-full aspect-square rounded-lg overflow-hidden border border-gray-200">
-                    <img src={`http://172.16.10.148:5000${f.file_path}`} alt="foto" className="w-full h-full object-cover" />
+                    <img src={`http://172.16.13.82:5000${f.file_path}`} alt="foto" className="w-full h-full object-cover" />
                     <button type="button" onClick={() => deleteExistingFoto(f.id)}
                       className="absolute top-0.5 right-0.5 bg-red-600 text-white rounded-full p-0.5 cursor-pointer">
                       <X size={10} />
@@ -339,7 +339,7 @@ export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit
               <div className="flex flex-col gap-1 mb-1">
                 {existingManualBook.map((m) => (
                   <div key={`existing-${m.id}`} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5">
-                    <a href={`http://172.16.10.148:5000${m.file_path}`} target="_blank" rel="noreferrer"
+                    <a href={`http://172.16.13.82:5000${m.file_path}`} target="_blank" rel="noreferrer"
                       className="text-[10px] text-[#005CA9] font-medium truncate hover:underline">
                       {m.file_path.split('/').pop()}
                     </a>

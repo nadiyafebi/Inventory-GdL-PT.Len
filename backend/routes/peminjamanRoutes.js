@@ -20,7 +20,22 @@ const fotoPeminjamanStorage = multer.diskStorage({
     cb(null, uniqueName);
   }
 });
-const uploadFotoPeminjaman = multer({ storage: fotoPeminjamanStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+
+// Fix: fileFilter supaya cuma nerima gambar
+const uploadFotoPeminjaman = multer({
+  storage: fotoPeminjamanStorage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true);
+    } else {
+      cb(new Error('File harus berupa gambar'), false);
+    }
+  }
+});
+
+// Status barang yang berarti "tersedia untuk dipinjam" (whitelist)
+const STATUS_TERSEDIA = ['Disimpan', 'Didaftarkan', 'Dikembalikan'];
 
 // ===== GET semua peminjaman (dengan filter) =====
 router.get('/', verifyToken, async (req, res) => {
@@ -57,56 +72,69 @@ router.get('/', verifyToken, async (req, res) => {
   }
 });
 
-// ===== AJUKAN peminjaman baru (LANGSUNG OTOMATIS DISETUJUI, tanpa approval admin) =====
+// ===== AJUKAN peminjaman baru (LANGSUNG DIPINJAM, atomic dengan row lock + whitelist status) =====
 router.post('/', verifyToken, uploadFotoPeminjaman.single('fotoSebelum'), async (req, res) => {
+  const conn = await pool.getConnection();
   try {
     const { barangId, tanggalPinjam, tanggalRencanaKembali, keperluan } = req.body;
     const userId = req.user.id;
     const fotoSebelum = req.file ? `/uploads/peminjaman/${req.file.filename}` : null;
 
     if (!barangId || !tanggalPinjam) {
+      conn.release();
       return res.status(400).json({ success: false, data: null, message: 'Barang dan tanggal pinjam wajib diisi' });
     }
 
-    const [barangRows] = await pool.query('SELECT id, kondisi, status FROM barang WHERE id = ?', [barangId]);
+    await conn.beginTransaction();
+
+    // Lock row barang - request lain untuk barang yang sama akan menunggu sampai transaction ini selesai
+    const [barangRows] = await conn.query(
+      'SELECT id, kondisi, status FROM barang WHERE id = ? FOR UPDATE',
+      [barangId]
+    );
+
     if (barangRows.length === 0) {
+      await conn.rollback();
       return res.status(404).json({ success: false, data: null, message: 'Barang tidak ditemukan' });
     }
     const barang = barangRows[0];
 
-    const [activeLoans] = await pool.query(
-      `SELECT id FROM peminjaman WHERE barang_id = ? AND status IN ('Menunggu Persetujuan','Disetujui','Dipinjam','Menunggu Verifikasi')`,
-      [barangId]
-    );
-    if (activeLoans.length > 0) {
-      return res.status(409).json({ success: false, data: null, message: 'Barang ini sedang dipinjam atau masih dalam proses peminjaman lain' });
+    // Whitelist: hanya status yang eksplisit diizinkan yang boleh dipinjam
+    if (!STATUS_TERSEDIA.includes(barang.status)) {
+      await conn.rollback();
+      return res.status(409).json({
+        success: false,
+        data: null,
+        message: `Barang tidak tersedia untuk dipinjam (status saat ini: ${barang.status})`
+      });
     }
 
-    // Langsung status 'Dipinjam' + tercatat disetujui saat itu juga (tanpa approval manual admin)
-    const [result] = await pool.query(
+    const [result] = await conn.query(
       `INSERT INTO peminjaman (barang_id, user_id, tanggal_pinjam, tanggal_rencana_kembali, keperluan, kondisi_awal, foto_sebelum, status, disetujui_pada)
        VALUES (?, ?, ?, ?, ?, ?, ?, 'Dipinjam', NOW())`,
       [barangId, userId, tanggalPinjam, tanggalRencanaKembali || null, keperluan || null, barang.kondisi, fotoSebelum]
     );
 
-    // Barang langsung berstatus Dipinjam
-    await pool.query(`UPDATE barang SET status='Dipinjam' WHERE id=?`, [barangId]);
+    await conn.query(`UPDATE barang SET status='Dipinjam' WHERE id=?`, [barangId]);
 
-    // Catat log transaksi langsung
-    await pool.query(
+    await conn.query(
       `INSERT INTO log_transaksi (barang_id, penanggung_jawab, aktivitas, tanggal, remark)
        SELECT ?, u.nama, 'Dipinjam', NOW(), ? FROM users u WHERE u.id=?`,
       [barangId, keperluan || null, userId]
     );
 
+    await conn.commit();
     res.json({ success: true, data: { id: result.insertId }, message: 'Peminjaman berhasil, barang langsung dipinjamkan' });
   } catch (err) {
+    await conn.rollback();
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Server error' });
+  } finally {
+    conn.release();
   }
 });
 
-// ===== APPROVE / TOLAK peminjaman (admin only) - tetap ada untuk data lama yang masih Menunggu Persetujuan =====
+// ===== APPROVE / TOLAK peminjaman (admin only) - dipertahankan untuk data lama yang masih Menunggu Persetujuan =====
 router.put('/:id/persetujuan', verifyToken, requireAdmin, async (req, res) => {
   const conn = await pool.getConnection();
   try {
@@ -156,29 +184,60 @@ router.put('/:id/persetujuan', verifyToken, requireAdmin, async (req, res) => {
 
 // ===== AJUKAN pengembalian (user) =====
 router.put('/:id/kembalikan', verifyToken, uploadFotoPeminjaman.single('fotoSesudah'), async (req, res) => {
+  const conn = await pool.getConnection();
   try {
     const { id } = req.params;
     const { tanggalKembaliAktual, kondisiSaatKembali, catatanPengembalian } = req.body;
     const fotoSesudah = req.file ? `/uploads/peminjaman/${req.file.filename}` : null;
+    const userId = req.user.id;
 
-    const [rows] = await pool.query('SELECT * FROM peminjaman WHERE id = ?', [id]);
+    const [rows] = await conn.query('SELECT * FROM peminjaman WHERE id = ?', [id]);
     if (rows.length === 0) {
+      conn.release();
       return res.status(404).json({ success: false, data: null, message: 'Peminjaman tidak ditemukan' });
     }
     if (rows[0].status !== 'Dipinjam') {
+      conn.release();
       return res.status(400).json({ success: false, data: null, message: 'Peminjaman ini tidak dalam status dipinjam' });
     }
 
-    await pool.query(
-      `UPDATE peminjaman SET status='Menunggu Verifikasi', tanggal_kembali_aktual=?, kondisi_saat_kembali=?, catatan_pengembalian=?, foto_sesudah=?
-       WHERE id=?`,
-      [tanggalKembaliAktual || new Date().toISOString().split('T')[0], kondisiSaatKembali, catatanPengembalian || null, fotoSesudah, id]
-    );
+    const KONDISI_AMAN = ['Baru', 'Baik', 'Siap Pakai'];
+    const isKondisiAman = KONDISI_AMAN.includes(kondisiSaatKembali);
 
-    res.json({ success: true, data: { id }, message: 'Pengembalian diajukan, menunggu verifikasi admin' });
+    await conn.beginTransaction();
+
+    if (isKondisiAman) {
+      await conn.query(
+        `UPDATE peminjaman SET status='Selesai', tanggal_kembali_aktual=?, kondisi_saat_kembali=?, catatan_pengembalian=?, foto_sesudah=?, diverifikasi_pada=NOW()
+        WHERE id=?`,
+        [tanggalKembaliAktual || new Date().toISOString().split('T')[0], kondisiSaatKembali, catatanPengembalian || null, fotoSesudah, id]
+      );
+      await conn.query(`UPDATE barang SET status='Disimpan', kondisi=? WHERE id=?`, [kondisiSaatKembali, rows[0].barang_id]);
+      await conn.query(
+        `INSERT INTO log_transaksi (barang_id, penanggung_jawab, aktivitas, kondisi, tanggal, remark)
+         SELECT ?, u.nama, 'Dikembalikan', ?, NOW(), ? FROM users u WHERE u.id=?`,
+        [rows[0].barang_id, kondisiSaatKembali, catatanPengembalian, userId]
+      );
+    } else {
+      await conn.query(
+        `UPDATE peminjaman SET status='Menunggu Verifikasi', tanggal_kembali_aktual=?, kondisi_saat_kembali=?, catatan_pengembalian=?, foto_sesudah=?
+         WHERE id=?`,
+        [tanggalKembaliAktual || new Date().toISOString().split('T')[0], kondisiSaatKembali, catatanPengembalian || null, fotoSesudah, id]
+      );
+    }
+
+    await conn.commit();
+    res.json({
+      success: true,
+      data: { id },
+      message: isKondisiAman ? 'Pengembalian berhasil, barang kembali ke inventory' : 'Pengembalian diajukan, menunggu verifikasi admin karena kondisi barang perlu dicek'
+    });
   } catch (err) {
+    await conn.rollback();
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Server error' });
+  } finally {
+    conn.release();
   }
 });
 
@@ -360,12 +419,11 @@ router.get('/menunggu-saya', verifyToken, async (req, res) => {
   }
 });
 
-// ===== GET daftar peminjaman AKTIF milik user yang login (untuk "barang perlu dikembalikan") =====
+// ===== GET daftar peminjaman AKTIF milik user yang login =====
 router.get('/milik-saya', verifyToken, async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // Ambil SEMUA field yang dibutuhkan dari tabel barang dan users
     const [rows] = await pool.query(
       `SELECT 
         p.*,
@@ -389,8 +447,6 @@ router.get('/milik-saya', verifyToken, async (req, res) => {
        ORDER BY p.tanggal_rencana_kembali ASC`,
       [userId]
     );
-
-    console.log(`📊 Found ${rows.length} active loans for user ${userId}`);
 
     const data = rows.map(r => {
       let sisaHari = null;
@@ -432,7 +488,7 @@ router.get('/milik-saya', verifyToken, async (req, res) => {
 
     res.json({ success: true, data, message: '' });
   } catch (err) {
-    console.error('❌ Error fetching user loans:', err);
+    console.error('Error fetching user loans:', err);
     res.status(500).json({ success: false, data: null, message: 'Server error: ' + err.message });
   }
 });

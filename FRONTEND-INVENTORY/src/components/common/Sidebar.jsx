@@ -25,8 +25,6 @@ const iconStyles = {
 const defaultMenuItems = [
   { name: 'Dashboard', iconKey: 'dashboard', path: '/admin/dashboard' },
   { name: 'Master Barang', iconKey: 'barang', path: '/admin/master-barang' },
-  { name: 'Catat Peminjaman dan Pengembalian', iconKey: 'peminjaman', path: '/admin/peminjaman-pengembalian' },
-  { name: 'Catat Booking Ruangan', iconKey: 'booking', path: '/admin/booking-ruangan' },
   { name: 'Filter Ruangan', iconKey: 'filterRuangan', path: '/admin/filter-ruangan' },
   { name: 'Riwayat', iconKey: 'riwayat', path: '/admin/riwayat' },
 ];

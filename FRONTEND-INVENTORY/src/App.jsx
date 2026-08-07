@@ -10,8 +10,6 @@ import Register from './pages/auth/Register';
 import DashboardAdmin from './pages/admin/DashboardAdmin';
 import MasterBarangAdmin from './pages/admin/MasterBarang';
 import TambahBarang from './pages/admin/TambahBarang';
-import CatatPeminjamanPengembalianAdmin from './pages/admin/CatatPeminjamanPengembalian';
-import CatatBookingRuanganAdmin from './pages/admin/CatatBookingRuangan';
 import FilterRuanganAdmin from './pages/admin/FilterRuangan';
 import RiwayatAdmin from './pages/admin/Riwayat';
 
@@ -53,8 +51,6 @@ function App() {
             <Route path="/admin/dashboard" element={<DashboardAdmin />} />
             <Route path="/admin/master-barang" element={<MasterBarangAdmin />} />
             <Route path="/admin/master-barang/tambah" element={<TambahBarang />} />
-            <Route path="/admin/peminjaman-pengembalian" element={<CatatPeminjamanPengembalianAdmin />} />
-            <Route path="/admin/booking-ruangan" element={<CatatBookingRuanganAdmin />} />
             <Route path="/admin/filter-ruangan" element={<FilterRuanganAdmin />} />
             <Route path="/admin/riwayat" element={<RiwayatAdmin />} />
           </Route>
