@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { X, Pencil, FileText } from 'lucide-react'
 
-const API_BASE = 'http://172.16.13.82:5000'
-const API = 'http://172.16.13.82:5000/api'
+const API_BASE = 'http://172.16.13.53:5000'
+const API = 'http://172.16.13.53:5000/api'
 
 export default function DetailBarangModal({ isOpen, onClose, data, onEdit }) {
   const [fotoList, setFotoList] = useState([])
