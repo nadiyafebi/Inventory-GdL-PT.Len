@@ -9,7 +9,7 @@ import ImportBarangModal from '../../components/barang/ImportBarangModal.jsx'
 import DetailBarangModal from '../../components/barang/DetailBarangModal.jsx'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.16.13.53:5000/api'
+const API_BASE = 'http://172.16.13.82:5000/api'
 
 export default function MasterBarang() {
   const [barang, setBarang] = useState([])
@@ -42,7 +42,7 @@ export default function MasterBarang() {
       .then(result => {
         if (result.success) {
           setBarang(result.data.map(b => ({
-            ...b, id: b.id, kode: b.kodeBarang, nama: b.namaBarang, program: b.programProject
+            ...b, id: b.id, kode: b.kodeBarang, nama: b.namaBarang, program: b.programProject, hargaAset: b.harga
           })))
         }
       })
@@ -93,7 +93,8 @@ export default function MasterBarang() {
           status: form.status,
           kondisi: form.kondisi,
           lokasi: form.lokasi,
-          catatan: form.catatan
+          catatan: form.catatan,
+          harga: form.hargaAset || null
         })
       })
 
@@ -136,7 +137,8 @@ export default function MasterBarang() {
           status: form.status,
           kondisi: form.kondisi,
           lokasi: form.lokasi,
-          catatan: form.catatan
+          catatan: form.catatan,
+          harga: form.hargaAset || null
         })
       })
 

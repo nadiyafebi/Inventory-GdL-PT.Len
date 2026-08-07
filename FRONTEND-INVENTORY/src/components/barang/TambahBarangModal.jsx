@@ -2,7 +2,79 @@ import { useState } from 'react'
 import { X, ChevronDown, Image as ImageIcon, FileText, FileCheck, Trash2 } from 'lucide-react'
 import { PROGRAM_OPTIONS, STATUS_OPTIONS, KONDISI_OPTIONS } from '../../utils/constants.js'
 
-const API_BASE = 'http://172.20.10.8:5000/api'
+const API_BASE = 'http://172.16.13.82:5000/api'
+
+const inputClass = 'w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700'
+const labelClass = 'text-[11px] font-medium text-gray-400'
+
+// ===== Komponen kecil dipindah ke LUAR TambahBarangModal =====
+// Kalau Field/FileRow/Dropdown didefinisikan DI DALAM komponen utama, mereka
+// dibuat ulang sebagai fungsi baru setiap kali form re-render (misal tiap
+// ketik 1 huruf). React menganggap itu komponen yang beda sepenuhnya, jadi
+// <input> lama dibongkar dan dibuat baru dari nol — itu sebabnya fokus
+// hilang tiap ketik 1 karakter. Didefinisikan di luar supaya cuma dibuat sekali.
+
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className={labelClass}>{label}</label>
+      {children}
+    </div>
+  )
+}
+
+function FileRow({ label, icon, files, onAdd, onRemove, accept }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label className={`${labelClass} flex items-center gap-1`}>{icon} {label}</label>
+      {files.length > 0 && (
+        <div className="flex flex-col gap-1 mb-1">
+          {files.map((file, idx) => (
+            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5">
+              <span className="text-[10px] text-gray-600 font-medium truncate">{file.name}</span>
+              <button type="button" onClick={() => onRemove(idx)} className="text-red-500 hover:text-red-700 cursor-pointer shrink-0 ml-2">
+                <Trash2 size={12} />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="flex items-center gap-3">
+        <label className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#005CA9] text-[10px] font-bold rounded-lg border border-blue-200 cursor-pointer transition-colors shrink-0">
+          Pilih File
+          <input type="file" accept={accept} multiple onChange={onAdd} className="hidden" />
+        </label>
+        <span className="text-[10px] text-gray-500 font-medium truncate">
+          {files.length === 0 ? 'Tidak ada file yang dipilih' : `${files.length} file dipilih`}
+        </span>
+      </div>
+    </div>
+  )
+}
+
+function Dropdown({ label, value, options, isOpen, onToggle, onSelect, zIndex }) {
+  return (
+    <div className={`flex flex-col gap-1 relative overflow-visible ${zIndex}`}>
+      <label className={labelClass}>{label}</label>
+      <button type="button"
+        onClick={onToggle}
+        className="w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700 text-left flex justify-between items-center cursor-pointer select-none">
+        <span>{value || `Pilih ${label}`}</span>
+        <ChevronDown size={14} className="text-gray-500" />
+      </button>
+      {isOpen && (
+        <div className="absolute left-0 right-0 top-[56px] bg-white border border-gray-100 rounded-2xl shadow-xl z-50 p-2.5 flex flex-col gap-1.5 max-h-40 overflow-y-auto select-none">
+          {options.map((opt) => (
+            <div key={opt} onClick={() => onSelect(opt)}
+              className="w-full text-center px-2 py-1.5 text-[11px] font-bold text-white bg-[#005CA9] rounded-full cursor-pointer hover:bg-[#004B8A] transition-colors truncate">
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({
@@ -122,65 +194,6 @@ export default function TambahBarangModal({ isOpen, onClose, onSubmit }) {
       setSubmitting(false)
     }
   }
-
-  const inputClass = 'w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700'
-  const labelClass = 'text-[11px] font-medium text-gray-400'
-
-  const Field = ({ label, children }) => (
-    <div className="flex flex-col gap-1">
-      <label className={labelClass}>{label}</label>
-      {children}
-    </div>
-  )
-
-  const FileRow = ({ label, icon, files, onAdd, onRemove, accept }) => (
-    <div className="flex flex-col gap-1.5">
-      <label className={`${labelClass} flex items-center gap-1`}>{icon} {label}</label>
-      {files.length > 0 && (
-        <div className="flex flex-col gap-1 mb-1">
-          {files.map((file, idx) => (
-            <div key={idx} className="flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-2.5 py-1.5">
-              <span className="text-[10px] text-gray-600 font-medium truncate">{file.name}</span>
-              <button type="button" onClick={() => onRemove(idx)} className="text-red-500 hover:text-red-700 cursor-pointer shrink-0 ml-2">
-                <Trash2 size={12} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-      <div className="flex items-center gap-3">
-        <label className="px-3 py-1.5 bg-blue-50 hover:bg-blue-100 text-[#005CA9] text-[10px] font-bold rounded-lg border border-blue-200 cursor-pointer transition-colors shrink-0">
-          Pilih File
-          <input type="file" accept={accept} multiple onChange={onAdd} className="hidden" />
-        </label>
-        <span className="text-[10px] text-gray-500 font-medium truncate">
-          {files.length === 0 ? 'Tidak ada file yang dipilih' : `${files.length} file dipilih`}
-        </span>
-      </div>
-    </div>
-  )
-
-  const Dropdown = ({ label, value, options, isOpen, onToggle, onSelect, zIndex }) => (
-    <div className={`flex flex-col gap-1 relative overflow-visible ${zIndex}`}>
-      <label className={labelClass}>{label}</label>
-      <button type="button"
-        onClick={onToggle}
-        className="w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700 text-left flex justify-between items-center cursor-pointer select-none">
-        <span>{value || `Pilih ${label}`}</span>
-        <ChevronDown size={14} className="text-gray-500" />
-      </button>
-      {isOpen && (
-        <div className="absolute left-0 right-0 top-[56px] bg-white border border-gray-100 rounded-2xl shadow-xl z-50 p-2.5 flex flex-col gap-1.5 max-h-40 overflow-y-auto select-none">
-          {options.map((opt) => (
-            <div key={opt} onClick={() => onSelect(opt)}
-              className="w-full text-center px-2 py-1.5 text-[11px] font-bold text-white bg-[#005CA9] rounded-full cursor-pointer hover:bg-[#004B8A] transition-colors truncate">
-              {opt}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
 
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">

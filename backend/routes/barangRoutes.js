@@ -22,6 +22,11 @@ if (!fs.existsSync(uploadDirManualBook)) {
   fs.mkdirSync(uploadDirManualBook, { recursive: true });
 }
 
+const uploadDirDokumentasi = path.join(__dirname, '..', 'uploads', 'barang', 'dokumentasi');
+if (!fs.existsSync(uploadDirDokumentasi)) {
+  fs.mkdirSync(uploadDirDokumentasi, { recursive: true });
+}
+
 const fotoStorage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, uploadDir),
   filename: (req, file, cb) => {
@@ -41,6 +46,26 @@ const manualBookStorage = multer.diskStorage({
 const uploadManualBook = multer({
   storage: manualBookStorage,
   limits: { fileSize: 10 * 1024 * 1024 }, // max 10MB (PDF biasanya lebih besar dari foto)
+  fileFilter: (req, file, cb) => {
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
+    if (allowed.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Tipe file tidak didukung. Hanya PDF atau gambar (JPG/PNG/WEBP).'));
+    }
+  }
+});
+
+const dokumentasiStorage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, uploadDirDokumentasi),
+  filename: (req, file, cb) => {
+    const uniqueName = `${Date.now()}-${Math.round(Math.random() * 1e9)}${path.extname(file.originalname)}`;
+    cb(null, uniqueName);
+  }
+});
+const uploadDokumentasi = multer({
+  storage: dokumentasiStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // max 10MB
   fileFilter: (req, file, cb) => {
     const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/jpg', 'image/webp'];
     if (allowed.includes(file.mimetype)) {
@@ -81,6 +106,7 @@ function toCamel(row) {
     kodeBarang: row.kode_barang,
     namaBarang: row.nama_barang,
     quantity: row.quantity,
+    harga: row.harga,
     partNumber: row.part_number,
     merk: row.merk,
     tipe: row.tipe,
@@ -141,7 +167,8 @@ router.post('/', verifyToken, requireAdmin, async (req, res) => {
       status,
       kondisi,
       lokasi,
-      catatan
+      catatan,
+      harga
     } = req.body;
 
     const serial = serialNumber?.trim() || null;
@@ -189,13 +216,13 @@ router.post('/', verifyToken, requireAdmin, async (req, res) => {
       (
         kode_barang, nama_barang, quantity, part_number, merk, tipe,
         penanggung_jawab, serial_number, nomor_inventaris_ga, program_project,
-        status, kondisi, lokasi, catatan
+        status, kondisi, lokasi, catatan, harga
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         kodeBarang, namaBarang, quantity || 1, part, merk, tipe,
         penanggungJawab, serial, inventaris, programProject,
-        status || "Dibeli", kondisi, lokasi, catatan
+        status || "Dibeli", kondisi, lokasi, catatan, harga || null
       ]
     );
 
@@ -226,7 +253,7 @@ router.post('/', verifyToken, requireAdmin, async (req, res) => {
 router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
   try {
     const { id } = req.params;
-    const { kodeBarang, namaBarang, quantity, partNumber, merk, tipe, penanggungJawab, serialNumber, nomorInventarisGa, programProject, status, kondisi, lokasi, catatan } = req.body;
+    const { kodeBarang, namaBarang, quantity, partNumber, merk, tipe, penanggungJawab, serialNumber, nomorInventarisGa, programProject, status, kondisi, lokasi, catatan, harga } = req.body;
 
     // ubah string kosong jadi NULL, biar gak kena UNIQUE constraint
     const serial = serialNumber?.trim() || null;
@@ -252,9 +279,9 @@ router.put('/:id', verifyToken, requireAdmin, async (req, res) => {
     }
 
     await pool.query(
-      `UPDATE barang SET kode_barang=?, nama_barang=?, quantity=?, part_number=?, merk=?, tipe=?, penanggung_jawab=?, serial_number=?, nomor_inventaris_ga=?, program_project=?, status=?, kondisi=?, lokasi=?, catatan=?
+      `UPDATE barang SET kode_barang=?, nama_barang=?, quantity=?, part_number=?, merk=?, tipe=?, penanggung_jawab=?, serial_number=?, nomor_inventaris_ga=?, program_project=?, status=?, kondisi=?, lokasi=?, catatan=?, harga=?
        WHERE id=?`,
-      [kodeBarang, namaBarang, quantity, part, merk, tipe, penanggungJawab, serial, inventaris, programProject, status, kondisi, lokasi, catatan, id]
+      [kodeBarang, namaBarang, quantity, part, merk, tipe, penanggungJawab, serial, inventaris, programProject, status, kondisi, lokasi, catatan, harga || null, id]
     );
 
     res.json({ success: true, data: { id }, message: 'Barang berhasil diupdate' });
@@ -670,7 +697,8 @@ router.post('/export', verifyToken, async (req, res) => {
       status: { key: 'status', label: 'Status' },
       kondisi: { key: 'kondisi', label: 'Kondisi' },
       lokasi: { key: 'lokasi', label: 'Lokasi' },
-      catatan: { key: 'catatan', label: 'Catatan' }
+      catatan: { key: 'catatan', label: 'Catatan' },
+      harga: { key: 'harga', label: 'Harga Aset' }
     };
 
     const selectedCols = (columns && columns.length > 0) ? columns : Object.keys(columnMap);
@@ -1016,6 +1044,77 @@ router.delete('/manual-book/:manualId', verifyToken, requireAdmin, async (req, r
     fs.unlink(filePath, () => {});
 
     res.json({ success: true, data: null, message: 'File manual book berhasil dihapus' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, data: null, message: 'Server error' });
+  }
+});
+
+// ===== DOKUMENTASI TRANSAKSI (nota, dll) =====
+router.get('/:id/dokumentasi-transaksi', verifyToken, async (req, res) => {
+  try {
+    const { id } = req.params;
+    const [rows] = await pool.query(
+      'SELECT id, file_path, keterangan, diupload_pada FROM barang_dokumentasi WHERE barang_id = ? ORDER BY diupload_pada DESC',
+      [id]
+    );
+    res.json({ success: true, data: rows, message: '' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ success: false, data: null, message: 'Server error' });
+  }
+});
+
+router.post('/:id/dokumentasi-transaksi', verifyToken, requireAdmin, (req, res) => {
+  uploadDokumentasi.array('dokumentasiTransaksi', 10)(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ success: false, data: null, message: err.message });
+    }
+    try {
+      const { id } = req.params;
+
+      const [barangRows] = await pool.query('SELECT id FROM barang WHERE id = ?', [id]);
+      if (barangRows.length === 0) {
+        return res.status(404).json({ success: false, data: null, message: 'Barang tidak ditemukan' });
+      }
+
+      if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ success: false, data: null, message: 'Tidak ada file yang diupload' });
+      }
+
+      const inserted = [];
+      for (const file of req.files) {
+        const filePath = `/uploads/barang/dokumentasi/${file.filename}`;
+        const [result] = await pool.query(
+          'INSERT INTO barang_dokumentasi (barang_id, file_path) VALUES (?, ?)',
+          [id, filePath]
+        );
+        inserted.push({ id: result.insertId, filePath });
+      }
+
+      res.json({ success: true, data: inserted, message: `${inserted.length} dokumentasi berhasil diupload` });
+    } catch (err2) {
+      console.error(err2);
+      res.status(500).json({ success: false, data: null, message: 'Gagal upload dokumentasi' });
+    }
+  });
+});
+
+router.delete('/dokumentasi-transaksi/:dokId', verifyToken, requireAdmin, async (req, res) => {
+  try {
+    const { dokId } = req.params;
+
+    const [rows] = await pool.query('SELECT file_path FROM barang_dokumentasi WHERE id = ?', [dokId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ success: false, data: null, message: 'Dokumentasi tidak ditemukan' });
+    }
+
+    await pool.query('DELETE FROM barang_dokumentasi WHERE id = ?', [dokId]);
+
+    const filePath = path.join(__dirname, '..', rows[0].file_path.replace(/^\//, ''));
+    fs.unlink(filePath, () => {});
+
+    res.json({ success: true, data: null, message: 'Dokumentasi berhasil dihapus' });
   } catch (err) {
     console.error(err);
     res.status(500).json({ success: false, data: null, message: 'Server error' });

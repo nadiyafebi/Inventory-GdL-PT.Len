@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { FileText } from 'lucide-react'
 
-const API_BASE = 'http://172.16.13.53:5000'
-const API = 'http://172.16.13.53:5000/api'
+const API_BASE = 'http://172.16.13.82:5000'
+const API = 'http://172.16.13.82:5000/api'
 
 export default function DetailBarangModal({ isOpen, onClose, data, onEdit }) {
   const [fotoList, setFotoList] = useState([])
@@ -23,7 +23,7 @@ export default function DetailBarangModal({ isOpen, onClose, data, onEdit }) {
         .then(result => { if (result.success) setManualBookList(result.data) })
         .catch(err => console.error('Gagal ambil manual book:', err))
 
-      fetch(`${API}/barang/${data.id}/dokumentasi`, { headers: { Authorization: `Bearer ${token}` } })
+      fetch(`${API}/barang/${data.id}/dokumentasi-transaksi`, { headers: { Authorization: `Bearer ${token}` } })
         .then(res => res.json())
         .then(result => { if (result.success) setDokumentasiList(result.data) })
         .catch(err => console.error('Gagal ambil dokumentasi transaksi:', err))

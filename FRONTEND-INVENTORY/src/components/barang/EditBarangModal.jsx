@@ -2,8 +2,51 @@ import React, { useState, useEffect } from 'react';
 import { X, ChevronDown, Image as ImageIcon, FileText, FileCheck, Trash2 } from 'lucide-react';
 import { PROGRAM_OPTIONS, STATUS_OPTIONS, KONDISI_OPTIONS } from '../../utils/constants.js';
 
-const API_BASE = 'http://172.16.13.53:5000/api';
-const FILE_BASE = 'http://172.16.13.53:5000';
+const API_BASE = 'http://172.16.13.82:5000/api';
+const FILE_BASE = 'http://172.16.13.82:5000';
+
+const inputClass = 'w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700';
+const labelClass = 'text-[11px] font-medium text-gray-400';
+
+// ===== Komponen kecil dipindah ke LUAR EditBarangModal =====
+// Ini kuncinya: kalau Field/Dropdown didefinisikan di DALAM komponen utama,
+// mereka akan dibuat ulang sebagai fungsi baru setiap kali komponen utama
+// re-render (misalnya setiap ketik 1 huruf di input). React menganggap itu
+// komponen yang berbeda sepenuhnya, jadi <input> lama dibongkar dan dibuat
+// baru dari nol — itu sebabnya fokus/cursor hilang tiap ketik 1 karakter.
+// Dengan didefinisikan di luar, Field & Dropdown cuma dibuat sekali.
+
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1">
+      <label className={labelClass}>{label}</label>
+      {children}
+    </div>
+  );
+}
+
+function Dropdown({ label, field, value, options, zIndex, openDropdown, toggleDropdown, selectOption }) {
+  return (
+    <div className={`flex flex-col gap-1 relative overflow-visible ${zIndex}`}>
+      <label className={labelClass}>{label}</label>
+      <button type="button" onClick={() => toggleDropdown(field)}
+        className="w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700 text-left flex justify-between items-center cursor-pointer select-none">
+        <span>{value || `Pilih ${label}`}</span>
+        <ChevronDown size={14} className="text-gray-500" />
+      </button>
+      {openDropdown[field] && (
+        <div className="absolute left-0 right-0 top-[56px] bg-white border border-gray-100 rounded-2xl shadow-xl z-50 p-2.5 flex flex-col gap-1.5 max-h-40 overflow-y-auto select-none">
+          {options.map((opt) => (
+            <div key={opt} onClick={() => selectOption(field, opt)}
+              className="w-full text-center px-2 py-1.5 text-[11px] font-bold text-white bg-[#005CA9] rounded-full cursor-pointer hover:bg-[#004B8A] transition-colors truncate">
+              {opt}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit }) {
   const [formData, setFormData] = useState({
@@ -217,37 +260,6 @@ export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit
     }
   };
 
-  const inputClass = 'w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700';
-  const labelClass = 'text-[11px] font-medium text-gray-400';
-
-  const Field = ({ label, children }) => (
-    <div className="flex flex-col gap-1">
-      <label className={labelClass}>{label}</label>
-      {children}
-    </div>
-  );
-
-  const Dropdown = ({ label, field, value, options, zIndex }) => (
-    <div className={`flex flex-col gap-1 relative overflow-visible ${zIndex}`}>
-      <label className={labelClass}>{label}</label>
-      <button type="button" onClick={() => toggleDropdown(field)}
-        className="w-full text-xs px-3 py-2.5 bg-[#EAEAEA] border-none rounded-lg focus:outline-none font-medium text-gray-700 text-left flex justify-between items-center cursor-pointer select-none">
-        <span>{value || `Pilih ${label}`}</span>
-        <ChevronDown size={14} className="text-gray-500" />
-      </button>
-      {openDropdown[field] && (
-        <div className="absolute left-0 right-0 top-[56px] bg-white border border-gray-100 rounded-2xl shadow-xl z-50 p-2.5 flex flex-col gap-1.5 max-h-40 overflow-y-auto select-none">
-          {options.map((opt) => (
-            <div key={opt} onClick={() => selectOption(field, opt)}
-              className="w-full text-center px-2 py-1.5 text-[11px] font-bold text-white bg-[#005CA9] rounded-full cursor-pointer hover:bg-[#004B8A] transition-colors truncate">
-              {opt}
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
-
   return (
     <div className="fixed inset-0 bg-black/40 backdrop-blur-xs flex items-center justify-center z-50 p-4 animate-fadeIn">
       <div className="bg-white rounded-[20px] shadow-2xl p-6 w-full max-w-[820px] flex flex-col gap-4 relative overflow-visible max-h-[90vh]">
@@ -294,19 +306,28 @@ export default function EditBarangModal({ isOpen, onClose, initialData, onSubmit
               <input type="text" name="tipe" value={formData.tipe} onChange={handleInputChange} className={inputClass} />
             </Field>
 
-            <Dropdown label="Program/Project" field="program" value={formData.program} options={PROGRAM_OPTIONS} zIndex="z-40" />
+            <Dropdown
+              label="Program/Project" field="program" value={formData.program} options={PROGRAM_OPTIONS} zIndex="z-40"
+              openDropdown={openDropdown} toggleDropdown={toggleDropdown} selectOption={selectOption}
+            />
 
             <Field label="Kode">
               <input type="text" name="kode" value={formData.kode} onChange={handleInputChange} className={inputClass} />
             </Field>
 
-            <Dropdown label="Status" field="status" value={formData.status} options={STATUS_OPTIONS} zIndex="z-30" />
+            <Dropdown
+              label="Status" field="status" value={formData.status} options={STATUS_OPTIONS} zIndex="z-30"
+              openDropdown={openDropdown} toggleDropdown={toggleDropdown} selectOption={selectOption}
+            />
 
             <Field label="No Inventaris GA">
               <input type="text" name="nomorInventarisGa" value={formData.nomorInventarisGa} onChange={handleInputChange} className={inputClass} />
             </Field>
 
-            <Dropdown label="Kondisi" field="kondisi" value={formData.kondisi} options={KONDISI_OPTIONS} zIndex="z-20" />
+            <Dropdown
+              label="Kondisi" field="kondisi" value={formData.kondisi} options={KONDISI_OPTIONS} zIndex="z-20"
+              openDropdown={openDropdown} toggleDropdown={toggleDropdown} selectOption={selectOption}
+            />
 
             <Field label="Serial Number">
               <input type="text" name="serialNumber" value={formData.serialNumber} onChange={handleInputChange} className={inputClass} />
